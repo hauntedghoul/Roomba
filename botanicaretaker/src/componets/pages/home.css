@@ -1,0 +1,11 @@
+.home{
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('https://i.pinimg.com/736x/e5/a2/89/e5a28990030a33d9617a5a8ac24b62c7.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 700px;
+    width:auto;
+}
