@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route} from "react-router-dom"; //put in nav page
+import { BrowserRouter as Router, Routes, Route} from "react-router-dom"; 
 import './App.css';
 import Home from './componets/pages/home'
 import Login from './componets/pages/login'
@@ -16,6 +16,8 @@ function App() {
           <Route path="/" exact element={<Home />} />
           <Route path="/login" exact element={<Login/>} />
           <Route path="/register"exact element={<Register/>} />
+          <Route path="/logs" exact element={<Logs/>}/>
+          <Route path="/settings" exact element={<Settings/>}/>
         </Routes>
       </div>
     </Router>
