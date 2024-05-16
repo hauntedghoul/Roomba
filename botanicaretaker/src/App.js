@@ -3,7 +3,7 @@ import './App.css';
 import Home from './componets/pages/home'
 import Login from './componets/pages/login'
 import Logs from './componets/pages/logs'
-import Settings from './componets/pages/setttings'
+import Settings from './componets/pages/settings'
 import Register from './componets/pages/register'
 import Save from './componets/pages/save'
 import Navbar from './componets/navbar/navbar';
@@ -18,8 +18,9 @@ function App() {
           <Route path="/login" exact element={<Login />} />
           <Route path="/register" exact element={<Register />} />
           <Route path="/logs" exact element={<Logs />} />
-          <Route path="/save" exact element={<Save />} />
           <Route path="/settings" exact element={<Settings />} />
+          <Route path="/save" exact element={<Save />} />
+          
         </Routes>
       </div>
     </Router>

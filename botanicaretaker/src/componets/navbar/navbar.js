@@ -19,7 +19,7 @@ function Navbar() {
           <Link to="/logs">Logs</Link>
         </li>
         <li>
-          <Link to="/setting">Setting</Link>
+          <Link to="/settings">Setting</Link>
         </li>
         <li>
           <Link to="/save">Save</Link>
