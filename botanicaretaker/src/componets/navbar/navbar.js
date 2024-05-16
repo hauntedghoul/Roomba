@@ -16,10 +16,13 @@ function Navbar() {
           <Link to="/register">Register</Link>
         </li>
         <li>
-          <Link to="/logs">logs</Link>
+          <Link to="/logs">Logs</Link>
         </li>
         <li>
-          <Link to="/setting">setting</Link>
+          <Link to="/setting">Setting</Link>
+        </li>
+        <li>
+          <Link to="/save">Save</Link>
         </li>
       </ul>
     </nav>
