@@ -8,7 +8,7 @@ function Home() {
       {/* <h1>Home Page</h1>
       <p>Welcome to the Home Page!</p> */}
       <div className='plant'>
-        <img src='botanicaretaker\public\images\plant7.PNG' />
+        <img src='botanicaretaker\public\images\plant7.PNG' alt='plant7' />
       </div>
 
     </div>
