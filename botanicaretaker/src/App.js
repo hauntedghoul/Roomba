@@ -7,6 +7,7 @@ import Settings from './componets/pages/settings'
 import Register from './componets/pages/register'
 import Save from './componets/pages/save'
 import Navbar from './componets/navbar/navbar';
+import SeedPage from "./componets/pages/seedpage";
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
           <Route path="/logs" exact element={<Logs />} />
           <Route path="/settings" exact element={<Settings />} />
           <Route path="/save" exact element={<Save />} />
-          
+          <Route path="/seed" exact element={<SeedPage />} />
         </Routes>
       </div>
     </Router>
