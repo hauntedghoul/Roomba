@@ -1,29 +1,41 @@
-const { MongoClient } = require("mongodb");
+// <<<<<<< Chelsea-Branch
+// import React from 'react'
 
-const uri = "mongodb+srv://roomba:Roomba01@cluster0.fm4mkz2.mongodb.net/";
-const client = new MongoClient(uri);
+// const database = () => {
+//   return (
+//     <div>database</div>
+//   )
+// }
 
-function addUser(user, pass) {
-    try {
-        const database = client.db('Roomba');
-        const users = database.collection("User");
+// export default database
+// =======
+// const { MongoClient } = require("mongodb");
 
-        const doc = {
-            Username: user,
-            Password: pass
-        }
+// const uri = "mongodb+srv://roomba:Roomba01@cluster0.fm4mkz2.mongodb.net/";
+// const client = new MongoClient(uri);
 
-        const result = users.insertOne(doc);
-        console.log('Inserted');
-    } finally {
-        client.close();
-    }
-}
+// function addUser(user, pass) {
+//     try {
+//         const database = client.db('Roomba');
+//         const users = database.collection("User");
 
-function viewAllLog() {
+//         const doc = {
+//             Username: user,
+//             Password: pass
+//         }
+
+//         const result = users.insertOne(doc);
+//         console.log('Inserted');
+//     } finally {
+//         client.close();
+//     }
+// }
+
+// function viewAllLog() {
     
-}
+// }
 
-function openLog() {
+// function openLog() {
 
-}
+// }
+// >>>>>>> Boe's-Branch
