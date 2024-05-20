@@ -1,0 +1,62 @@
+.home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    /* background-image: url('/botanicaretaker/public/images/background.jpg'); */
+    /* background-image: url('https://i.pinimg.com/736x/e5/a2/89/e5a28990030a33d9617a5a8ac24b62c7.jpg'); */
+    height: 90vh;
+    position: relative;
+}
+  
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+  
+.plant {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+  
+.plantBackground {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: blue;
+}
+  
+.can {
+    max-width: 100%;
+    height: 400px;
+}
+  
+.WaterCan {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: auto; 
+}
+  
+.WaterCan img {
+    display: block;
+    width: 100%;
+    height: 300px;
+    transition: transform 0.3s ease; 
+}
+  
+.WaterCan:hover {
+    transform: scale(1.1); 
+    background: none; 
+}
