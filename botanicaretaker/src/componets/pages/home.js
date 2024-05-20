@@ -127,28 +127,15 @@ function Home() {
   }, [isWatered, predictWateringNeed]);
 
   return (
-//     <div className='home'>
-// <<<<<<< Chelsea-Branch
-//       <div className='content'>
-//         <div className='plant'>
-//           <div style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
-//             <img className='can' src='/images/plant7.PNG' alt='Plant' />
-//           </div>
-// =======
-//       <div>
-//         <div className='plant'>
-//           <br/>
-//           <br/>
-//         <img className='waterCan' src='/images/watering.PNG' alt='watering' />
-//         <button>
-//           <img className='can' src='/images/plant7.PNG' alt='Plant' /> 
-//         </button>
-
-// >>>>>>> Johanna's-branches
-//         </div>
-//         <button onClick={waterPlant} className='WaterCan'>
-//           <img src='/images/watering.PNG' alt='watering' />
-//         </button>
+     <div className='home'>
+      <div className='content>
+        <div className='plant>
+           <div style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green': 'red', margin: '20px auto' }}>
+             <img className='can' src='/images/plant7.PNG' alt='Plant' />
+            </div>
+           <button onClick={waterPlant} className='WaterCan'>
+             <img src='/images/watering.PNG' alt='watering' />
+           </button>
       </div>
     </div>
   );
