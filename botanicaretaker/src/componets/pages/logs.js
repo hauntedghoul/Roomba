@@ -1,32 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './logs.css'
 
 function Logs() {
+
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      const response = await fetch('https://localhost:4206/api/logs');
+      const data = await response.json();
+      setLogs(data);
+    };
+    fetchLogs();
+  }, []);
+
   return (
-    <div className="container">
+<div className="container">
       <h1>Logs</h1>
       <table>
         <thead>
           <tr>
             <th>Date</th>
-            <th>User</th>
-            <th>Action</th>
+            <th>Plant</th>
+            <th>Height</th>
+            <th>Health</th>
+            <th>Stage</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>2023-03-15</td>
-            <td>John Doe</td>
-            <td>Created new user</td>
-          </tr>
-          <tr>
-            <td>2023-03-14</td>
-            <td>Jane Doe</td>
-            <td>Deleted log entry</td>
-          </tr>
+          {logs.map((log) => (
+            <tr key={log._id}>
+              <td>{new Date(log.time).toLocaleString()}</td>
+              <td>{log.plantId.name}</td>
+              <td>{log.height}</td>
+              <td>{log.health}</td>
+              <td>{log.stage}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
-      <button>Clear Logs</button>
+      <button onClick={() => setLogs([])}>Clear Logs</button>
     </div>
   );
 }
