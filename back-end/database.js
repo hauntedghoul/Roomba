@@ -29,6 +29,16 @@ app.post('/api/logs', async (req, res) => {
   }
 });
 
+app.get('/api/logs', async (req, res) => {
+  try {
+    const logs = await DAL.getAllLogs();
+    res.status(200).json(logs);
+  } catch (error) {
+    console.error('Error getting all logs:', error); // Log the error
+    res.status(500).json({ error: error.message }); // Send error as JSON response
+  }
+});
+
 app.get('/api/plants/:id', async (req, res) => {
   try {
     const plant = await DAL.getPlantById(req.params.id);
