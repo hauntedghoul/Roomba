@@ -2,8 +2,20 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './home.css';
 import * as tf from '@tensorflow/tfjs';
 
+const growthStages = [
+  { minHeight: 0, maxHeight: 30, image: '/images/Stage1.png', label: 'Stage 1' },
+  { minHeight: 31, maxHeight: 45, image: '/images/Stage2.png', label: 'Stage 2' },
+  { minHeight: 46, maxHeight: 60, image: '/images/Stage3.png', label: 'Stage 3' },
+  { minHeight: 61, maxHeight: 75, image: '/images/Stage4.png', label: 'Stage 4' },
+  { minHeight: 76, maxHeight: 90, image: '/images/Stage5.png', label: 'Stage 5' },
+  { minHeight: 91, maxHeight: 105, image: '/images/Stage6.png', label: 'Stage 6' },
+  { minHeight: 106, maxHeight: 120, image: '/images/Stage7.png', label: 'Stage 7' }
+];
+
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
+  const [height, setHeight] = useState(20); // Initial height of the plant in cm
+  const [currentStage, setCurrentStage] = useState(growthStages[0]);
   const modelRef = useRef(null);
   const epochLogRef = useRef({});
 
@@ -42,22 +54,24 @@ function Home() {
     const logDataAfterEpoch = (epoch, logs) => {
       if (!epochLogRef.current[epoch]) {
         epochLogRef.current[epoch] = true;
-        
+
         const summaryObject = {
-          "Epoch": epoch,
-          "Soil Moisture": summarizeArray(soilMoisture),
-          "Temperature": summarizeArray(temperature),
-          "Humidity": summarizeArray(humidity),
-          "Light Exposure": summarizeArray(lightExposure),
-          "Water ML": summarizeArray(waterMl)
+          Epoch: epoch,
+          SoilMoisture: summarizeArray(soilMoisture),
+          Temperature: summarizeArray(temperature),
+          Humidity: summarizeArray(humidity),
+          LightExposure: summarizeArray(lightExposure),
+          WaterML: summarizeArray(waterMl)
         };
 
-        console.log("Epoch", epoch, ": Summary of data:", [summaryObject]);
+        const log = JSON.stringify({ logType: "Epoch Summary", data: summaryObject });
+        console.log(log); // Output JSON to console
+        waterPlant();
       }
     };
 
     await newModel.fit(features, labels, {
-      epochs: 5,
+      epochs: 1,
       batchSize: 5,
       callbacks: { onEpochEnd: logDataAfterEpoch },
     });
@@ -83,12 +97,46 @@ function Home() {
     };
   }, [createAndTrainModel]);
 
+  const logWatering = (newHeight, stage) => {
+    const summaryObject = {
+      Height: newHeight,
+      Stage: stage.label,
+      SoilMoisture: { min: 0.1, max: 0.4, mean: 0.25 },  // Dummy values, replace with real data if available
+      Temperature: { min: 72, max: 72, mean: 72 },  // Dummy values, replace with real data if available
+      Humidity: { min: 20, max: 50, mean: 35 },  // Dummy values, replace with real data if available
+      LightExposure: { min: 0.5, max: 0.5, mean: 0.5 },  // Dummy values, replace with real data if available
+      WaterML: { min: 10, max: 50, mean: 30 }  // Dummy values, replace with real data if available
+    };
+
+    const log = JSON.stringify({ logType: "Watering Log", data: summaryObject });
+    console.log(log); // Output JSON to console
+  };
+
+  const getCurrentStage = (height) => {
+    return growthStages.find(stage => height >= stage.minHeight && height <= stage.maxHeight);
+  };
+
   const waterPlant = () => {
     setIsWatered(true);
+    setHeight(prevHeight => {
+      const newHeight = prevHeight + 5;
+      console.log(JSON.stringify({ logType: "Height Log", data: { newHeight } })); // Log the new height
+
+      const nextStage = getCurrentStage(newHeight);
+      console.log(JSON.stringify({ logType: "Stage Log", data: { nextStage: nextStage.label } })); // Log the next stage
+
+      if (nextStage !== currentStage) {
+        console.log(JSON.stringify({ logType: "Stage Advancement", data: { message: `The plant has advanced to the ${nextStage.label} stage.` } }));
+        setCurrentStage(nextStage);
+      }
+
+      logWatering(newHeight, nextStage);
+      return newHeight;
+    });
 
     setTimeout(() => {
       setIsWatered(false);
-    }, 1800000);
+    }, 30000); // 1 minute
   };
 
   const predictWateringNeed = useCallback(async () => {
@@ -121,21 +169,25 @@ function Home() {
           waterPlant();
         }
       }
-    }, 1800000);
+    }, 30000); // 30 seconds
 
     return () => clearInterval(intervalId);
-  }, [isWatered, predictWateringNeed]);
+  }, [isWatered, predictWateringNeed, waterPlant]);
 
   return (
-     <div className='home'>
-      <div className='content>
-        <div className='plant>
-           <div style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green': 'red', margin: '20px auto' }}>
-             <img className='can' src='/images/plant7.PNG' alt='Plant' />
-            </div>
-           <button onClick={waterPlant} className='WaterCan'>
-             <img src='/images/watering.PNG' alt='watering' />
-           </button>
+    <div className='home'>
+      <div className='content'>
+        <div className='plant'>
+          <div className='Water' style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
+            <img className='can' src={currentStage.image} alt='Plant' />
+          </div>
+          <div>
+            Current Height: {height.toFixed(2)} cm
+          </div>
+        </div>
+        <button onClick={waterPlant} className='WaterCan'>
+          <img src='/images/watering.PNG' alt='watering' />
+        </button>
       </div>
     </div>
   );
