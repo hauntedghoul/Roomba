@@ -12,12 +12,22 @@ const growthStages = [
   { minHeight: 106, maxHeight: 120, image: '/images/Stage7.png', label: 'Stage 7' }
 ];
 
+const GOAL_STAGE_LABEL = 'Stage 7';
+
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
   const [height, setHeight] = useState(20); // Initial height of the plant in cm
   const [currentStage, setCurrentStage] = useState(growthStages[0]);
+  const [rewardPoints, setRewardPoints] = useState(0);
   const modelRef = useRef(null);
   const epochLogRef = useRef({});
+  const wateringIntervalRef = useRef(null);
+  const goalAchievedRef = useRef(false);
+
+  const REWARD_FOR_WATERING = 0.5;
+  const PUNISHMENT_FOR_UNDERWATERING = -1;
+  const REWARD_FOR_STAGE_ADVANCEMENT = 1;
+  const GOAL_REWARD = 100;
 
   const createAndTrainModel = useCallback(async () => {
     if (modelRef.current) {
@@ -65,7 +75,7 @@ function Home() {
         };
 
         console.log("Epoch", epoch, ": Summary of data:", [summaryObject]);
-        waterPlant();
+        waterPlant(true);
       }
     };
 
@@ -93,6 +103,9 @@ function Home() {
       if (modelRef.current) {
         modelRef.current.dispose();
       }
+      if (wateringIntervalRef.current) {
+        clearInterval(wateringIntervalRef.current);
+      }
     };
   }, [createAndTrainModel]);
 
@@ -112,30 +125,39 @@ function Home() {
 
   const getCurrentStage = (height) => {
     return growthStages.find(stage => height >= stage.minHeight && height <= stage.maxHeight);
-  };
-
-  const waterPlant = () => {
+  }
+  const waterPlant = (isAi = false) => {
     setIsWatered(true);
     setHeight(prevHeight => {
-      const newHeight = prevHeight + 5;
+      const newHeight = prevHeight + 3;
       console.log("New height:", newHeight); // Log the new height
-
+  
       const nextStage = getCurrentStage(newHeight);
       console.log("Next stage:", nextStage); // Log the next stage
-
+  
       if (nextStage !== currentStage) {
         console.log(`The plant has advanced to the ${nextStage.label} stage.`);
         setCurrentStage(nextStage);
+        setRewardPoints(prevPoints => prevPoints + REWARD_FOR_STAGE_ADVANCEMENT);
+        if (nextStage.label === GOAL_STAGE_LABEL && !goalAchievedRef.current) {
+          goalAchievedRef.current = true;
+          notifyUserGoalAchieved();
+          setRewardPoints(prevPoints => prevPoints + GOAL_REWARD);
+        }
       }
-
+  
       logWatering(newHeight, nextStage);
+      if (isAi) {
+        setRewardPoints(prevPoints => prevPoints + REWARD_FOR_WATERING);
+      }
       return newHeight;
     });
-
+  
     setTimeout(() => {
       setIsWatered(false);
-    }, 30000); // 1 minute
+    }, 30000); // 30 seconds
   };
+  
 
   const predictWateringNeed = useCallback(async () => {
     if (modelRef.current) {
@@ -164,26 +186,39 @@ function Home() {
       if (!isWatered) {
         const needsWater = await predictWateringNeed();
         if (needsWater) {
-          waterPlant();
+          waterPlant(true); // AI waters the plant
+        } else {
+          setRewardPoints(prevPoints => prevPoints + PUNISHMENT_FOR_UNDERWATERING);
         }
       }
     }, 30000); // 30 seconds
 
+    wateringIntervalRef.current = intervalId;
+
     return () => clearInterval(intervalId);
-  }, [isWatered, predictWateringNeed, waterPlant]);
+  }, [isWatered, predictWateringNeed]);
+
+  const notifyUserGoalAchieved = () => {
+    window.alert('Congratulations! Your plant has reached the 7th stage.');
+  };
 
   return (
     <div className='home'>
       <div className='content'>
         <div className='plant'>
-          <div className='Water' style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
+          <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
             <img className='can' src={currentStage.image} alt='Plant' />
           </div>
           <div>
-            Current Height: {height.toFixed(2)} cm
+            <h3>Name of the AI: Bimbo</h3>  
+            <img className='Bimbo' src='/images/Bimbo.png' alt='Bimbos face' />
+            <br />
+            Current Height: {height} cm
+            <br />
+            Reward Points: {rewardPoints}
           </div>
         </div>
-        <button onClick={waterPlant} className='WaterCan'>
+        <button onClick={() => waterPlant(false)} className='WaterCan'>
           <img src='/images/watering.PNG' alt='watering' />
         </button>
       </div>

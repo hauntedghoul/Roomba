@@ -4,9 +4,8 @@
     align-items: center;
     background-size: cover;
     background-position: center;
-    /* background-image: url('/botanicaretaker/public/images/background.jpg'); */
-    /* background-image: url('https://i.pinimg.com/736x/e5/a2/89/e5a28990030a33d9617a5a8ac24b62c7.jpg'); */
-    height: 90vh;
+    background-image: url('https://i.pinimg.com/736x/e5/a2/89/e5a28990030a33d9617a5a8ac24b62c7.jpg'); 
+    height: 93.7vh;
     position: relative;
 }
   
@@ -59,4 +58,9 @@
 .WaterCan:hover {
     transform: scale(1.1); 
     background: none; 
+}
+
+.Bimbo{
+    width: 200px;
+    height: 150px;
 }
