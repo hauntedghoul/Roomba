@@ -100,11 +100,11 @@ function Home() {
     const summaryObject = {
       "Height": newHeight,
       "Stage": stage.label,
-      "Soil Moisture": { min: 0.1, max: 0.4, mean: 0.25 },  // Dummy values, replace with real data if available
-      "Temperature": { min: 72, max: 72, mean: 72 },  // Dummy values, replace with real data if available
-      "Humidity": { min: 20, max: 50, mean: 35 },  // Dummy values, replace with real data if available
-      "Light Exposure": { min: 0.5, max: 0.5, mean: 0.5 },  // Dummy values, replace with real data if available
-      "Water ML": { min: 10, max: 50, mean: 30 }  // Dummy values, replace with real data if available
+      "Soil Moisture": { min: 0.1, max: 0.4, mean: 0.25 }, 
+      "Temperature": { min: 72, max: 72, mean: 72 }, 
+      "Humidity": { min: 20, max: 50, mean: 35 }, 
+      "Light Exposure": { min: 0.5, max: 0.5, mean: 0.5 },  
+      "Water ML": { min: 10, max: 50, mean: 30 }  
     };
 
     console.log("Plant was watered. New state:", summaryObject);
