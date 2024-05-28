@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './home.css';
 import * as tf from '@tensorflow/tfjs';
+import { Link } from 'react-router-dom';
 
 const growthStages = [
   { minHeight: 0, maxHeight: 30, image: '/images/Stage1.png', label: 'Stage 1' },
@@ -209,9 +210,11 @@ function Home() {
           <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red'}}>
             <img className='can' src={currentStage.image} alt='Plant' />
           </div>
-          <div>
+          <div className='Info'>
             <h3>Name of the AI: Bimbo</h3>  
             <img className='Bimbo' src='/images/Bimbo.png' alt='Bimbos face' />
+            <br />
+            <h3>Name of plant: Gerald the Snake plant</h3>
             <br />
             Current Height: {height} cm
             <br />
@@ -221,6 +224,7 @@ function Home() {
         <button onClick={() => waterPlant(false)} className='WaterCan'>
           <img src='/images/watering.PNG' alt='watering' />
         </button>
+        <Link to="/seed"><button className='Seed'><img src='/images/Seeds.png' /></button></Link>
       </div>
     </div>
   );
