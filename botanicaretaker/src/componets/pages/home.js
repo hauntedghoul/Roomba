@@ -206,7 +206,7 @@ function Home() {
     <div className='home'>
       <div className='content'>
         <div className='plant'>
-          <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
+          <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red'}}>
             <img className='can' src={currentStage.image} alt='Plant' />
           </div>
           <div>
