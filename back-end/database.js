@@ -29,6 +29,15 @@ app.post('/api/logs', async (req, res) => {
   }
 });
 
+app.post('/api/ai-logs', async (req, res) => {
+  try {
+    const log = await DAL.createAILog(req.body);
+    res.status(201).json(log);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.get('/api/plants/:id', async (req, res) => {
   try {

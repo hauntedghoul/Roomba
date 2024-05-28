@@ -98,18 +98,43 @@ function Home() {
     };
   }, [createAndTrainModel]);
 
-  const logWatering = (newHeight) => {
+  const logWatering = async (newHeight, stage) => {
     const summaryObject = {
-      Height: newHeight,
-      Stage: stage.label,
+      plantId: 'fj86e', // need plant id - using gerald's
+      height: newHeight,
+      time: new Date(),
+      health: 'Healthy', // or other
+      stage: stage.label,
       SoilMoisture: { min: 0.1, max: 0.4, mean: 0.25 },  // Dummy values, replace with real data if available
       Temperature: { min: 72, max: 72, mean: 72 },  // Dummy values, replace with real data if available
       Humidity: { min: 20, max: 50, mean: 35 },  // Dummy values, replace with real data if available
       LightExposure: { min: 0.5, max: 0.5, mean: 0.5 },  // Dummy values, replace with real data if available
       WaterML: { min: 10, max: 50, mean: 30 }  // Dummy values, replace with real data if available
     };
-    const log = JSON.stringify({ logType: "Watering Log", data: summaryObject });
-    console.log(log); // Output JSON to console
+
+    const logData = {
+      logType: "Watering Log",
+      data: summaryObject
+    };
+
+    try {
+      const response = await fetch('http://localhost:4206/api/ai-logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(logData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Log successfully sent to server:', result);
+    } catch (error) {
+      console.error('Error sending log to server:', error);
+    }
   };
 
   const getCurrentStage = (height) => {
@@ -175,15 +200,16 @@ function Home() {
   }, [isWatered, predictWateringNeed, waterPlant]);
 
   return (
-     <div className='home'>
-      <div className='content>
-        <div className='plant>
-           <div style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green': 'red', margin: '20px auto' }}>
-             <img className='can' src='/images/plant7.PNG' alt='Plant' />
-            </div>
-           <button onClick={waterPlant} className='WaterCan'>
-             <img src='/images/watering.PNG' alt='watering' />
-           </button>
+    <div className='home'>
+      <div className='content'>
+        <div className='plant'>
+          <div style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
+            <img className='can' src='/images/plant7.PNG' alt='Plant' />
+          </div>
+          <button onClick={waterPlant} className='WaterCan'>
+            <img src='/images/watering.PNG' alt='watering' />
+          </button>
+        </div>
       </div>
     </div>
   );

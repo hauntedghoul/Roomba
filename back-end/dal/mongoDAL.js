@@ -28,6 +28,36 @@ const logSchema = new mongoose.Schema({
     stage: {
         type: String,
         default: ''
+    },
+    soilMoisture: {
+        min: Number,
+        max: Number,
+        mean: Number
+    },
+    temperature: {
+        min: Number,
+        max: Number,
+        mean: Number
+    },
+    humidity: {
+        min: Number,
+        max: Number,
+        mean: Number
+    },
+    lightExposure: {
+        min: Number,
+        max: Number,
+        mean: Number
+    },
+    waterML: {
+        min: Number,
+        max: Number,
+        mean: Number
+    },
+    logType: {
+        type: String,
+        enum: ['Watering Log', 'Epoch Summary', 'Height Log', 'Stage Log', 'Stage Advancement'],
+        required: true
     }
 });
 
@@ -63,6 +93,18 @@ exports.DAL = {
 
     getAllLogs: async () => {
         return await Log.find().populate('plantId').exec();
+    },
+
+    createAILog: async (logData) => {
+        try {
+            const log = new Log(logData);
+            const savedLog = await log.save();
+            await Plant.findByIdAndUpdate(logData.plantId, { $push: { logID: savedLog._id } });
+            return savedLog;
+        } catch (error) {
+            console.error('Error creating AI log:', error);
+            throw error;
+        }
     }
     
 };
