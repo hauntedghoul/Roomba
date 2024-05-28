@@ -53,7 +53,8 @@ exports.DAL = {
     createLog: async (logData) => {
         const log = new Log(logData);
         const savedLog = await log.save();
-        await Plant.findByIdAndUpdate(logData.plantId, {$push: { logID: savedLog._id} });
+        await Plant.findByIdAndUpdate(logData.plantId, {$push: { logID: savedLog._id } });
+        return savedLog;
     },
 
     getLogsByPlantId: async (plantId) => {
