@@ -14,7 +14,7 @@ const growthStages = [
 
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
-  const [height, setHeight] = useState(30); // Initial height of the plant in cm
+  const [height, setHeight] = useState(20); // Initial height of the plant in cm
   const [currentStage, setCurrentStage] = useState(growthStages[0]);
   const modelRef = useRef(null);
   const epochLogRef = useRef({});
@@ -65,11 +65,12 @@ function Home() {
         };
 
         console.log("Epoch", epoch, ": Summary of data:", [summaryObject]);
+        waterPlant();
       }
     };
 
     await newModel.fit(features, labels, {
-      epochs: 5,
+      epochs: 1,
       batchSize: 5,
       callbacks: { onEpochEnd: logDataAfterEpoch },
     });
@@ -133,7 +134,7 @@ function Home() {
 
     setTimeout(() => {
       setIsWatered(false);
-    }, 60000); // 1 minute
+    }, 30000); // 1 minute
   };
 
   const predictWateringNeed = useCallback(async () => {
@@ -166,7 +167,7 @@ function Home() {
           waterPlant();
         }
       }
-    }, 60000); // 1 minute
+    }, 30000); // 30 seconds
 
     return () => clearInterval(intervalId);
   }, [isWatered, predictWateringNeed, waterPlant]);
