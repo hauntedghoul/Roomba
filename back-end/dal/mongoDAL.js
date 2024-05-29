@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const plantSchema = new mongoose.Schema({
     plantId: Number,
     name: String,
@@ -8,7 +7,7 @@ const plantSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Log'
     }]
-})
+});
 
 const logSchema = new mongoose.Schema({
     plantId: {
@@ -61,16 +60,14 @@ const logSchema = new mongoose.Schema({
     }
 });
 
-const Plant = mongoose.model('Plant', plantSchema);
-const Log = mongoose.model('Logs', logSchema);
-
+const Plant = mongoose.model('plants', plantSchema);
+const Log = mongoose.model('logs', logSchema);
 
 mongoose.connect('mongodb+srv://mmitchell:Tuff12top@cluster0.fm4mkz2.mongodb.net/Roomba')
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error(err));
 
 exports.DAL = {
-
     createPlant: async (plantData) => {
         const plant = new Plant(plantData);
         return await plant.save();
@@ -108,3 +105,4 @@ exports.DAL = {
     }
     
 };
+
