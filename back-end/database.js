@@ -29,7 +29,16 @@ app.post('/api/logs', async (req, res) => {
   }
 });
 
-<<<<<<< Updated upstream
+app.post('/api/ai-logs', async (req, res) => {
+  try {
+    const log = await DAL.createAILog(req.body);
+    res.status(201).json(log);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 app.get('/api/plants/:id', async (req, res) => {
   try {
     const plant = await DAL.getPlantById(req.params.id);
@@ -43,23 +52,20 @@ app.get('/api/logs/:plantId', async (req, res) => {
   try {
     const logs = await DAL.getLogsByPlantId(req.params.plantId);
     res.status(200).json(logs);
-=======
 
 app.get('/api/plants/:id', async (req, res) => {
   try {
     const plant = await DAL.getPlantById(req.params.id);
     res.status(200).json(plant);
->>>>>>> Stashed changes
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-<<<<<<< Updated upstream
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
 });
-=======
+
 app.get('/api/logs/:plantId', async (req, res) => {
   try {
     const logs = await DAL.getLogsByPlantId(req.params.plantId);
@@ -76,5 +82,3 @@ app.listen(port, () => {
 
 // click watering can, it logs it did something 
 // on log page, get all logs
-// 
->>>>>>> Stashed changes

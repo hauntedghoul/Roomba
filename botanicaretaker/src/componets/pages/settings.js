@@ -3,8 +3,9 @@ import './settings.css'
 
 function Settings() {
   return (
-    <div className="container">
-    <h1>Plant Game Settings</h1>
+    <div>
+    <img className='Underconstruction' src='/images/Underconsruction.png' alt="Example" />
+    {/* <h1>Plant Game Settings</h1>
     <form>
       <label htmlFor="username">Username</label>
       <input type="text" id="username" name="username" />
@@ -22,7 +23,7 @@ function Settings() {
         <option value="hard">Hard</option>
       </select>
       <button type="submit">Save Changes</button>
-    </form>
+    </form> */}
   </div>
   );
 }
