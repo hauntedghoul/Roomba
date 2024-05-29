@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const plantSchema = new mongoose.Schema({
     plantId: Number,
     name: String,
@@ -8,7 +7,7 @@ const plantSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Log'
     }]
-})
+});
 
 const logSchema = new mongoose.Schema({
     plantId: {
@@ -62,49 +61,49 @@ const logSchema = new mongoose.Schema({
 });
 
 const Plant = mongoose.model('Plant', plantSchema);
-const Log = mongoose.model('Logs', logSchema);
+const Log = mongoose.model('Log', logSchema);
 
+const createPlant = async (plantData) => {
+    const plant = new Plant(plantData);
+    return await plant.save();
+};
 
-mongoose.connect('mongodb+srv://mmitchell:Tuff12top@cluster0.fm4mkz2.mongodb.net/Roomba')
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error(err));
+const getPlantById = async (plantId) => {
+    return await Plant.findById(plantId).populate('logID').exec();
+};
 
-exports.DAL = {
+const createLog = async (logData) => {
+    const log = new Log(logData);
+    const savedLog = await log.save();
+    await Plant.findByIdAndUpdate(logData.plantId, { $push: { logID: savedLog._id } });
+    return savedLog;
+};
 
-    createPlant: async (plantData) => {
-        const plant = new Plant(plantData);
-        return await plant.save();
-    },
+const getLogsByPlantId = async (plantId) => {
+    return await Log.find({ plantId }).exec();
+};
 
-    getPlantById: async (plantId) => {
-        return await Plant.findById(plantId).populate('logID').exec();
-    },
+const getAllLogs = async () => {
+    return await Log.find().populate('plantId').exec();
+};
 
-    createLog: async (logData) => {
+const createAILog = async (logData) => {
+    try {
         const log = new Log(logData);
         const savedLog = await log.save();
-        await Plant.findByIdAndUpdate(logData.plantId, {$push: { logID: savedLog._id } });
+        await Plant.findByIdAndUpdate(logData.plantId, { $push: { logID: savedLog._id } });
         return savedLog;
-    },
-
-    getLogsByPlantId: async (plantId) => {
-        return await Log.find({ plantId }).exec();
-    },
-
-    getAllLogs: async () => {
-        return await Log.find().populate('plantId').exec();
-    },
-
-    createAILog: async (logData) => {
-        try {
-            const log = new Log(logData);
-            const savedLog = await log.save();
-            await Plant.findByIdAndUpdate(logData.plantId, { $push: { logID: savedLog._id } });
-            return savedLog;
-        } catch (error) {
-            console.error('Error creating AI log:', error);
-            throw error;
-        }
+    } catch (error) {
+        console.error('Error creating AI log:', error);
+        throw error;
     }
-    
+};
+
+module.exports = {
+    createPlant,
+    getPlantById,
+    createLog,
+    getLogsByPlantId,
+    getAllLogs,
+    createAILog
 };

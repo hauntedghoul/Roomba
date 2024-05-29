@@ -2,8 +2,8 @@
   "name": "back-end",
   "version": "1.0.0",
   "description": "",
-  "main": "database.js",
-  "scripts": {
+  "main": "database.js"
+  ,"scripts": {
     "start": "node database.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

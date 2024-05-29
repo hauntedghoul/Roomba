@@ -3,6 +3,8 @@ import './home.css';
 import * as tf from '@tensorflow/tfjs';
 import { Link } from 'react-router-dom';
 
+const GOAL_STAGE_LABEL = 'Stage 7';
+
 const growthStages = [
   { minHeight: 0, maxHeight: 30, image: '/images/Stage1.png', label: 'Stage 1' },
   { minHeight: 31, maxHeight: 45, image: '/images/Stage2.png', label: 'Stage 2' },
@@ -12,8 +14,6 @@ const growthStages = [
   { minHeight: 91, maxHeight: 105, image: '/images/Stage6.png', label: 'Stage 6' },
   { minHeight: 106, maxHeight: 120, image: '/images/Stage7.png', label: 'Stage 7' }
 ];
-
-const GOAL_STAGE_LABEL = 'Stage 7';
 
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
@@ -67,16 +67,17 @@ function Home() {
         epochLogRef.current[epoch] = true;
 
         const summaryObject = {
-          "Epoch": epoch,
-          "Soil Moisture": summarizeArray(soilMoisture),
-          "Temperature": summarizeArray(temperature),
-          "Humidity": summarizeArray(humidity),
-          "Light Exposure": summarizeArray(lightExposure),
-          "Water ML": summarizeArray(waterMl)
+          Epoch: epoch,
+          SoilMoisture: summarizeArray(soilMoisture),
+          Temperature: summarizeArray(temperature),
+          Humidity: summarizeArray(humidity),
+          LightExposure: summarizeArray(lightExposure),
+          WaterML: summarizeArray(waterMl)
         };
 
-        console.log("Epoch", epoch, ": Summary of data:", [summaryObject]);
-        waterPlant(true);
+        const log = JSON.stringify({ logType: "Epoch Summary", data: summaryObject });
+        console.log(log); // Output JSON to console
+        waterPlant();
       }
     };
 
@@ -114,28 +115,31 @@ function Home() {
     const summaryObject = {
       "Height": newHeight,
       "Stage": stage.label,
-      "Soil Moisture": { min: 0.1, max: 0.4, mean: 0.25 }, 
-      "Temperature": { min: 72, max: 72, mean: 72 }, 
-      "Humidity": { min: 20, max: 50, mean: 35 }, 
-      "Light Exposure": { min: 0.5, max: 0.5, mean: 0.5 },  
-      "Water ML": { min: 10, max: 50, mean: 30 }  
+      "Soil Moisture": { min: 0.1, max: 0.4, mean: 0.25 },
+      "Temperature": { min: 72, max: 72, mean: 72 },
+      "Humidity": { min: 20, max: 50, mean: 35 },
+      "Light Exposure": { min: 0.5, max: 0.5, mean: 0.5 },
+      "Water ML": { min: 10, max: 50, mean: 30 }
     };
 
     console.log("Plant was watered. New state:", summaryObject);
+    const log = JSON.stringify({ logType: "Watering Log", data: summaryObject });
+    console.log(log); // Output JSON to console
   };
 
   const getCurrentStage = (height) => {
     return growthStages.find(stage => height >= stage.minHeight && height <= stage.maxHeight);
-  }
+  };
+
   const waterPlant = (isAi = false) => {
     setIsWatered(true);
     setHeight(prevHeight => {
       const newHeight = prevHeight + 3;
       console.log("New height:", newHeight); // Log the new height
-  
+
       const nextStage = getCurrentStage(newHeight);
       console.log("Next stage:", nextStage); // Log the next stage
-  
+
       if (nextStage !== currentStage) {
         console.log(`The plant has advanced to the ${nextStage.label} stage.`);
         setCurrentStage(nextStage);
@@ -146,19 +150,18 @@ function Home() {
           setRewardPoints(prevPoints => prevPoints + GOAL_REWARD);
         }
       }
-  
+
       logWatering(newHeight, nextStage);
       if (isAi) {
         setRewardPoints(prevPoints => prevPoints + REWARD_FOR_WATERING);
       }
       return newHeight;
     });
-  
+
     setTimeout(() => {
       setIsWatered(false);
     }, 30000); // 30 seconds
   };
-  
 
   const predictWateringNeed = useCallback(async () => {
     if (modelRef.current) {
@@ -197,7 +200,7 @@ function Home() {
     wateringIntervalRef.current = intervalId;
 
     return () => clearInterval(intervalId);
-  }, [isWatered, predictWateringNeed]);
+  }, [isWatered, predictWateringNeed, waterPlant]);
 
   const notifyUserGoalAchieved = () => {
     window.alert('Congratulations! Your plant has reached the 7th stage.');
@@ -207,11 +210,12 @@ function Home() {
     <div className='home'>
       <div className='content'>
         <div className='plant'>
-          <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red'}}>
+          <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red' }}>
+
             <img className='can' src={currentStage.image} alt='Plant' />
           </div>
           <div className='Info'>
-            <h3>Name of the AI: Bimbo</h3>  
+            <h3>Name of the AI: Bimbo</h3>
             <img className='Bimbo' src='/images/Bimbo.png' alt='Bimbos face' />
             <br />
             <h3>Name of plant: Gerald the Snake plant</h3>
@@ -220,13 +224,12 @@ function Home() {
             Reward Points: {rewardPoints}
           </div>
         </div>
-        <button onClick={() => waterPlant(false)} className='WaterCan'>
+        <button onClick={waterPlant} className='WaterCan'>
           <img src='/images/watering.PNG' alt='watering' />
         </button>
-        <Link to="/seed"><button className='Seed'><img src='/images/Seeds.png' alt='Seeds'/></button></Link>
       </div>
+      <Link to="/seed"><button className='Seed'><img src='/images/Seeds.png' alt='Seeds' /></button></Link>
     </div>
   );
 }
-
 export default Home;
