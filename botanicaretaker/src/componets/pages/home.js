@@ -10,12 +10,11 @@ const growthStages = [
   { minHeight: 76, maxHeight: 90, image: '/images/Stage5.png', label: 'Stage 5' },
   { minHeight: 91, maxHeight: 105, image: '/images/Stage6.png', label: 'Stage 6' },
   { minHeight: 106, maxHeight: 120, image: '/images/Stage7.png', label: 'Stage 7' }
-
 ];
 
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
-  const [height, setHeight] = useState(20); 
+  const [height, setHeight] = useState(20);
   const [currentStage, setCurrentStage] = useState(growthStages[0]);
   const modelRef = useRef(null);
   const epochLogRef = useRef({});
@@ -55,9 +54,11 @@ function Home() {
     const logDataAfterEpoch = (epoch, logs) => {
       if (!epochLogRef.current[epoch]) {
         epochLogRef.current[epoch] = true;
-        
+
         const summaryObject = {
           Epoch: epoch,
+          Height: height,
+          Stage: currentStage.label,
           SoilMoisture: summarizeArray(soilMoisture),
           Temperature: summarizeArray(temperature),
           Humidity: summarizeArray(humidity),
@@ -86,7 +87,7 @@ function Home() {
     waterMl.dispose();
     features.dispose();
     labels.dispose();
-  }, []);
+  }, [height, currentStage]);
 
   useEffect(() => {
     createAndTrainModel();
@@ -97,45 +98,6 @@ function Home() {
       }
     };
   }, [createAndTrainModel]);
-
-  const logWatering = async (newHeight, stage) => {
-    const summaryObject = {
-      plantId: 'fj86e', // need plant id - using gerald's
-      height: newHeight,
-      time: new Date(),
-      health: 'Healthy', // or other
-      stage: stage.label,
-      SoilMoisture: { min: 0.1, max: 0.4, mean: 0.25 },  // Dummy values, replace with real data if available
-      Temperature: { min: 72, max: 72, mean: 72 },  // Dummy values, replace with real data if available
-      Humidity: { min: 20, max: 50, mean: 35 },  // Dummy values, replace with real data if available
-      LightExposure: { min: 0.5, max: 0.5, mean: 0.5 },  // Dummy values, replace with real data if available
-      WaterML: { min: 10, max: 50, mean: 30 }  // Dummy values, replace with real data if available
-    };
-
-    const logData = {
-      logType: "Watering Log",
-      data: summaryObject
-    };
-
-    try {
-      const response = await fetch('http://localhost:4206/api/ai-logs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(logData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('Log successfully sent to server:', result);
-    } catch (error) {
-      console.error('Error sending log to server:', error);
-    }
-  };
 
   const getCurrentStage = (height) => {
     return growthStages.find(stage => height >= stage.minHeight && height <= stage.maxHeight);
@@ -155,13 +117,12 @@ function Home() {
         setCurrentStage(nextStage);
       }
 
-      logWatering(newHeight, nextStage);
       return newHeight;
     });
 
     setTimeout(() => {
       setIsWatered(false);
-    }, 30000); // 1 minute
+    }, 30000); // 30 seconds
   };
 
   const predictWateringNeed = useCallback(async () => {
