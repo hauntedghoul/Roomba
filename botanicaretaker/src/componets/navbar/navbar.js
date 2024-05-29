@@ -7,24 +7,19 @@ function Navbar() {
     <nav>
       <ul>
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/"><h2>Botani Caretaker</h2></Link>
         </li>
         <li>
-          <Link to="/login">Login</Link>
+          <Link to="/logs"><img className='NavImg' src='/images/Logs.PNG' /></Link>
         </li>
         <li>
-          <Link to="/register">Register</Link>
+          <Link to="/settings"><img className='NavImg' src='/images/Setting.PNG' /></Link>
         </li>
         <li>
-          <Link to="/logs">Logs</Link>
-        </li>
-        <li>
-          <Link to="/settings">Setting</Link>
-        </li>
-        <li>
-          <Link to="/save">Save</Link>
+          <Link to="/save"><img className='NavImg' src='/images/Save.PNG' /></Link>
         </li>
       </ul>
+      <img className='Shelf' src='images/shelf.png' alt='shelf' />  
     </nav>
   );
 }

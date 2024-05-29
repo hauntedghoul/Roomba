@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './home.css';
 import * as tf from '@tensorflow/tfjs';
+import { Link } from 'react-router-dom';
+
+const growthStages = [
+  { minHeight: 0, maxHeight: 30, image: '/images/Stage1.png', label: 'Stage 1' },
+  { minHeight: 31, maxHeight: 45, image: '/images/Stage2.png', label: 'Stage 2' },
+  { minHeight: 46, maxHeight: 60, image: '/images/Stage3.png', label: 'Stage 3' },
+  { minHeight: 61, maxHeight: 75, image: '/images/Stage4.png', label: 'Stage 4' },
+  { minHeight: 76, maxHeight: 90, image: '/images/Stage5.png', label: 'Stage 5' },
+  { minHeight: 91, maxHeight: 105, image: '/images/Stage6.png', label: 'Stage 6' },
+  { minHeight: 106, maxHeight: 120, image: '/images/Stage7.png', label: 'Stage 7' }
+];
+
+const GOAL_STAGE_LABEL = 'Stage 7';
 
 const growthStages = [
   { minHeight: 0, maxHeight: 30, image: '/images/Stage1.png', label: 'Stage 1' },
@@ -16,8 +29,16 @@ function Home() {
   const [isWatered, setIsWatered] = useState(false);
   const [height, setHeight] = useState(20); // Initial height of the plant in cm
   const [currentStage, setCurrentStage] = useState(growthStages[0]);
+  const [rewardPoints, setRewardPoints] = useState(0);
   const modelRef = useRef(null);
   const epochLogRef = useRef({});
+  const wateringIntervalRef = useRef(null);
+  const goalAchievedRef = useRef(false);
+
+  const REWARD_FOR_WATERING = 0.5;
+  const PUNISHMENT_FOR_UNDERWATERING = -1;
+  const REWARD_FOR_STAGE_ADVANCEMENT = 1;
+  const GOAL_REWARD = 100;
 
   const createAndTrainModel = useCallback(async () => {
     if (modelRef.current) {
@@ -94,11 +115,25 @@ function Home() {
       if (modelRef.current) {
         modelRef.current.dispose();
       }
+      if (wateringIntervalRef.current) {
+        clearInterval(wateringIntervalRef.current);
+      }
     };
   }, [createAndTrainModel]);
 
   const logWatering = (newHeight, stage) => {
     const summaryObject = {
+      "Height": newHeight,
+      "Stage": stage.label,
+      "Soil Moisture": { min: 0.1, max: 0.4, mean: 0.25 }, 
+      "Temperature": { min: 72, max: 72, mean: 72 }, 
+      "Humidity": { min: 20, max: 50, mean: 35 }, 
+      "Light Exposure": { min: 0.5, max: 0.5, mean: 0.5 },  
+      "Water ML": { min: 10, max: 50, mean: 30 }  
+    };
+
+    console.log("Plant was watered. New state:", summaryObject);
+  };
       Height: newHeight,
       Stage: stage.label,
       SoilMoisture: { min: 0.1, max: 0.4, mean: 0.25 },  // Dummy values, replace with real data if available
@@ -134,10 +169,41 @@ function Home() {
       return newHeight;
     });
 
+  const getCurrentStage = (height) => {
+    return growthStages.find(stage => height >= stage.minHeight && height <= stage.maxHeight);
+  }
+  const waterPlant = (isAi = false) => {
+    setIsWatered(true);
+    setHeight(prevHeight => {
+      const newHeight = prevHeight + 3;
+      console.log("New height:", newHeight); // Log the new height
+  
+      const nextStage = getCurrentStage(newHeight);
+      console.log("Next stage:", nextStage); // Log the next stage
+  
+      if (nextStage !== currentStage) {
+        console.log(`The plant has advanced to the ${nextStage.label} stage.`);
+        setCurrentStage(nextStage);
+        setRewardPoints(prevPoints => prevPoints + REWARD_FOR_STAGE_ADVANCEMENT);
+        if (nextStage.label === GOAL_STAGE_LABEL && !goalAchievedRef.current) {
+          goalAchievedRef.current = true;
+          notifyUserGoalAchieved();
+          setRewardPoints(prevPoints => prevPoints + GOAL_REWARD);
+        }
+      }
+  
+      logWatering(newHeight, nextStage);
+      if (isAi) {
+        setRewardPoints(prevPoints => prevPoints + REWARD_FOR_WATERING);
+      }
+      return newHeight;
+    });
+  
     setTimeout(() => {
       setIsWatered(false);
-    }, 30000); // 1 minute
+    }, 30000); // 30 seconds
   };
+  
 
   const predictWateringNeed = useCallback(async () => {
     if (modelRef.current) {
@@ -166,28 +232,45 @@ function Home() {
       if (!isWatered) {
         const needsWater = await predictWateringNeed();
         if (needsWater) {
-          waterPlant();
+          waterPlant(true); // AI waters the plant
+        } else {
+          setRewardPoints(prevPoints => prevPoints + PUNISHMENT_FOR_UNDERWATERING);
         }
       }
     }, 30000); // 30 seconds
 
+    wateringIntervalRef.current = intervalId;
+
+
     return () => clearInterval(intervalId);
   }, [isWatered, predictWateringNeed, waterPlant]);
+
+  const notifyUserGoalAchieved = () => {
+    window.alert('Congratulations! Your plant has reached the 7th stage.');
+  };
 
   return (
     <div className='home'>
       <div className='content'>
         <div className='plant'>
-          <div className='Water' style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
+          <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red'}}>
             <img className='can' src={currentStage.image} alt='Plant' />
           </div>
-          <div>
-            Current Height: {height.toFixed(2)} cm
+          <div className='Info'>
+            <h3>Name of the AI: Bimbo</h3>  
+            <img className='Bimbo' src='/images/Bimbo.png' alt='Bimbos face' />
+            <br />
+            <h3>Name of plant: Gerald the Snake plant</h3>
+            Current Height: {height} cm
+            <br />
+            Reward Points: {rewardPoints}
           </div>
         </div>
-        <button onClick={waterPlant} className='WaterCan'>
+        <button onClick={() => waterPlant(false)} className='WaterCan'>
           <img src='/images/watering.PNG' alt='watering' />
         </button>
+        <Link to="/seed"><button className='Seed'><img src='/images/Seeds.png' alt='Seeds'/></button></Link>
+
       </div>
     </div>
   );
