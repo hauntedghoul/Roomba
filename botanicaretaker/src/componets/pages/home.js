@@ -178,6 +178,7 @@ function Home() {
     <div className='home'>
       <div className='content'>
         <div className='plant'>
+<<<<<<< Updated upstream
           <div className='Water' style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
             <img className='can' src={currentStage.image} alt='Plant' />
           </div>
@@ -188,8 +189,17 @@ function Home() {
         <button onClick={waterPlant} className='WaterCan'>
           <img src='/images/watering.PNG' alt='watering' />
         </button>
+=======
+          <div style={{ width: '100%', height: '400px', backgroundColor: isWatered ? 'green' : 'red', margin: '20px auto' }}>
+            <img className='can' src='/images/plant7.PNG' alt='Plant' />
+          </div>
+          <button onClick={waterPlant} className='WaterCan'>
+            <img src='/images/watering.PNG' alt='watering' />
+          </button>
+        </div>
+>>>>>>> Stashed changes
       </div>
-    </div>
+    </div>    
   );
 }
 
