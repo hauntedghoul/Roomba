@@ -29,15 +29,15 @@ app.post('/api/logs', async (req, res) => {
   }
 });
 
-app.get('/api/logs', async (req, res) => {
+app.post('/api/ai-logs', async (req, res) => {
   try {
-    const logs = await DAL.getAllLogs();
-    res.status(200).json(logs);
+    const log = await DAL.createAILog(req.body);
+    res.status(201).json(log);
   } catch (error) {
-    console.error('Error getting all logs:', error); // Log the error
-    res.status(500).json({ error: error.message }); // Send error as JSON response
+    res.status(500).json({ error: error.message });
   }
 });
+
 
 app.get('/api/plants/:id', async (req, res) => {
   try {

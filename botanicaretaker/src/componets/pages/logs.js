@@ -47,4 +47,4 @@ function Logs() {
   </div>
 )};
 
-export default Logs; 
+export default Logs;

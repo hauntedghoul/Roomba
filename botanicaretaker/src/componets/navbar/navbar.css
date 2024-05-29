@@ -19,11 +19,6 @@ nav {
     text-decoration: none;
     display: block;
   }
-  
-  nav ul li a:hover {
-    background-color: #575757;
-    border-radius: 4px;
-  }
 
 .NavImg {
   margin-top: 27px;

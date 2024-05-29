@@ -215,7 +215,6 @@ function Home() {
             <img className='Bimbo' src='/images/Bimbo.png' alt='Bimbos face' />
             <br />
             <h3>Name of plant: Gerald the Snake plant</h3>
-            <br />
             Current Height: {height} cm
             <br />
             Reward Points: {rewardPoints}
@@ -224,7 +223,7 @@ function Home() {
         <button onClick={() => waterPlant(false)} className='WaterCan'>
           <img src='/images/watering.PNG' alt='watering' />
         </button>
-        <Link to="/seed"><button className='Seed'><img src='/images/Seeds.png' /></button></Link>
+        <Link to="/seed"><button className='Seed'><img src='/images/Seeds.png' alt='Seeds'/></button></Link>
       </div>
     </div>
   );
