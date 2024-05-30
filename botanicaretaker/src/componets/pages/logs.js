@@ -4,13 +4,14 @@ import './logs.css'
 function Logs() {
   const [logs, setLogs] = useState([])
 
+  const fetchLogs = async () => {
+    const response = await fetch('http://localhost:4206/api/logs');
+    const data = await response.json();
+    console.log(data)
+    setLogs(data)
+  };
+
   useEffect(() => {
-    const fetchLogs = async () => {
-      const response = await fetch('http://localhost:4206/api/logs');
-      const data = await response.json();
-      console.log(data)
-      setLogs(data)
-    };
     fetchLogs();
   }, []);
 
@@ -43,6 +44,7 @@ function Logs() {
         )) : null}
       </tbody>
     </table>
+    <button onClick={fetchLogs}>Refresh Logs</button>
     <button>Clear Logs</button>
   </div>
 )};

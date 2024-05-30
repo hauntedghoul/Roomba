@@ -63,5 +63,5 @@ exports.DAL = {
     getAllLogs: async () => {
         return await Log.find().populate('plantId').exec();
     }
-    
+
 };
