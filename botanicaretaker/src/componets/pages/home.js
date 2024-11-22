@@ -3,8 +3,6 @@ import './home.css';
 import * as tf from '@tensorflow/tfjs';
 import { Link } from 'react-router-dom';
 
-const GOAL_STAGE_LABEL = 'Stage 7';
-
 const growthStages = [
   { minHeight: 0, maxHeight: 30, image: '/images/Stage1.png', label: 'Stage 1' },
   { minHeight: 31, maxHeight: 45, image: '/images/Stage2.png', label: 'Stage 2' },
@@ -12,224 +10,194 @@ const growthStages = [
   { minHeight: 61, maxHeight: 75, image: '/images/Stage4.png', label: 'Stage 4' },
   { minHeight: 76, maxHeight: 90, image: '/images/Stage5.png', label: 'Stage 5' },
   { minHeight: 91, maxHeight: 105, image: '/images/Stage6.png', label: 'Stage 6' },
-  { minHeight: 106, maxHeight: 120, image: '/images/Stage7.png', label: 'Stage 7' }
+  { minHeight: 106, maxHeight: 120, image: '/images/Stage7.png', label: 'Stage 7' },
 ];
 
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
-  const [height, setHeight] = useState(20); // Initial height of the plant in cm
+  const [height, setHeight] = useState(20); // Initial height in cm
   const [currentStage, setCurrentStage] = useState(growthStages[0]);
   const [rewardPoints, setRewardPoints] = useState(0);
+  const [wateringInProgress, setWateringInProgress] = useState(false); // Guard flag
+
   const modelRef = useRef(null);
-  const epochLogRef = useRef({});
-  const wateringIntervalRef = useRef(null);
-  const goalAchievedRef = useRef(false);
+  const logTimerRef = useRef(null);
+  const wateringTimerRef = useRef(null);
 
-  const REWARD_FOR_WATERING = 0.5;
-  const PUNISHMENT_FOR_UNDERWATERING = -1;
-  const REWARD_FOR_STAGE_ADVANCEMENT = 1;
-  const GOAL_REWARD = 100;
+  const WATERING_INTERVAL = 30000; // 30 seconds
+  const LOGGING_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-  const createAndTrainModel = useCallback(async () => {
-    if (modelRef.current) {
-      modelRef.current.dispose();
-    }
-
-    const numSamples = 100;
-    const soilMoisture = tf.randomUniform([numSamples], 0.1, 0.4);
-    const temperature = tf.fill([numSamples], 72);
-    const humidity = tf.randomUniform([numSamples], 20, 50);
-    const lightExposure = tf.fill([numSamples], 0.5);
-    const waterMl = tf.randomUniform([numSamples], 10, 50);
-
-    const features = tf.stack([soilMoisture, temperature, humidity, lightExposure], 1);
+  // Train AI model
+  const trainModel = useCallback(async () => {
+    const soilMoisture = tf.randomUniform([200], 0.1, 0.5);
+    const temperature = tf.fill([200], 72);
+    const lightExposure = tf.randomUniform([200], 0.3, 0.7);
     const labels = soilMoisture.less(0.3).cast('float32');
 
-    const newModel = tf.sequential();
-    newModel.add(tf.layers.dense({ units: 4, inputShape: [4], activation: 'relu' }));
-    newModel.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+    const features = tf.stack([soilMoisture, temperature, lightExposure], 1);
 
-    newModel.compile({
+    const model = tf.sequential();
+    model.add(tf.layers.dense({ units: 8, inputShape: [3], activation: 'relu' }));
+    model.add(tf.layers.dense({ units: 4, activation: 'relu' }));
+    model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+
+    model.compile({
       optimizer: tf.train.adam(),
       loss: 'binaryCrossentropy',
       metrics: ['accuracy'],
     });
 
-    const summarizeArray = (arr) => {
-      const min = tf.min(arr).arraySync();
-      const max = tf.max(arr).arraySync();
-      const mean = tf.mean(arr).arraySync();
-      return { min, max, mean };
-    };
-
-    const logDataAfterEpoch = (epoch, logs) => {
-      if (!epochLogRef.current[epoch]) {
-        epochLogRef.current[epoch] = true;
-
-        const summaryObject = {
-          Epoch: epoch,
-          SoilMoisture: summarizeArray(soilMoisture),
-          Temperature: summarizeArray(temperature),
-          Humidity: summarizeArray(humidity),
-          LightExposure: summarizeArray(lightExposure),
-          WaterML: summarizeArray(waterMl)
-        };
-
-        const log = JSON.stringify({ logType: "Epoch Summary", data: summaryObject });
-        console.log(log); // Output JSON to console
-        waterPlant();
-      }
-    };
-
-    await newModel.fit(features, labels, {
-      epochs: 1,
-      batchSize: 5,
-      callbacks: { onEpochEnd: logDataAfterEpoch },
+    await model.fit(features, labels, {
+      epochs: 10,
+      batchSize: 10,
     });
 
-    modelRef.current = newModel;
-
-    soilMoisture.dispose();
-    temperature.dispose();
-    humidity.dispose();
-    lightExposure.dispose();
-    waterMl.dispose();
-    features.dispose();
-    labels.dispose();
+    modelRef.current = model;
+    tf.dispose([soilMoisture, temperature, lightExposure, labels, features]);
   }, []);
 
   useEffect(() => {
-    createAndTrainModel();
+    trainModel();
+  }, [trainModel]);
 
-    return () => {
-      if (modelRef.current) {
-        modelRef.current.dispose();
-      }
-      if (wateringIntervalRef.current) {
-        clearInterval(wateringIntervalRef.current);
-      }
-    };
-  }, [createAndTrainModel]);
-
-  const logWatering = (newHeight, stage) => {
-    const summaryObject = {
-      "Height": newHeight,
-      "Stage": stage.label,
-      "Soil Moisture": { min: 0.1, max: 0.4, mean: 0.25 },
-      "Temperature": { min: 72, max: 72, mean: 72 },
-      "Humidity": { min: 20, max: 50, mean: 35 },
-      "Light Exposure": { min: 0.5, max: 0.5, mean: 0.5 },
-      "Water ML": { min: 10, max: 50, mean: 30 }
+  // Log environment state periodically
+  const logEnvironment = useCallback(() => {
+    const environmentLog = {
+      timestamp: new Date().toISOString(),
+      soilMoisture: Math.random() * 0.2 + 0.1,
+      temperature: 72,
+      lightExposure: 0.5,
     };
 
-    console.log("Plant was watered. New state:", summaryObject);
-    const log = JSON.stringify({ logType: "Watering Log", data: summaryObject });
-    console.log(log); // Output JSON to console
-  };
+    console.log('Environment Log:', JSON.stringify(environmentLog, null, 2));
+  }, []);
 
+  useEffect(() => {
+    logTimerRef.current = setInterval(() => {
+      logEnvironment();
+    }, LOGGING_INTERVAL);
+
+    return () => clearInterval(logTimerRef.current);
+  }, [logEnvironment, LOGGING_INTERVAL]);
+
+  // Determine current stage of growth
   const getCurrentStage = (height) => {
-    return growthStages.find(stage => height >= stage.minHeight && height <= stage.maxHeight);
+    return growthStages.find(
+      (stage) => height >= stage.minHeight && height <= stage.maxHeight
+    );
   };
 
-  const waterPlant = (isAi = false) => {
-    setIsWatered(true);
-    setHeight(prevHeight => {
-      const newHeight = prevHeight + 3;
-      console.log("New height:", newHeight); // Log the new height
+  // Water the plant
+  const waterPlant = useCallback(
+    (isAi = false) => {
+      if (wateringInProgress) return;
 
-      const nextStage = getCurrentStage(newHeight);
-      console.log("Next stage:", nextStage); // Log the next stage
+      console.log(`Watering triggered. Is AI: ${isAi}`);
+      setWateringInProgress(true);
+      setIsWatered(true);
 
-      if (nextStage !== currentStage) {
-        console.log(`The plant has advanced to the ${nextStage.label} stage.`);
-        setCurrentStage(nextStage);
-        setRewardPoints(prevPoints => prevPoints + REWARD_FOR_STAGE_ADVANCEMENT);
-        if (nextStage.label === GOAL_STAGE_LABEL && !goalAchievedRef.current) {
-          goalAchievedRef.current = true;
-          notifyUserGoalAchieved();
-          setRewardPoints(prevPoints => prevPoints + GOAL_REWARD);
+      setHeight((prevHeight) => {
+        const newHeight = prevHeight + 3;
+        const nextStage = getCurrentStage(newHeight);
+
+        console.log("Plant height updated:", newHeight, "Current stage:", currentStage, "Next stage:", nextStage);
+
+        // AI Reward for watering only
+        if (isAi) {
+          // Reward for watering, subtract 0.5 to compensate for hook.js duplication
+          setRewardPoints((prev) => prev + 1 - 0.5);
+          console.log("AI rewarded 1 point for watering (adjusted for duplication).");
         }
-      }
 
-      logWatering(newHeight, nextStage);
-      if (isAi) {
-        setRewardPoints(prevPoints => prevPoints + REWARD_FOR_WATERING);
-      }
-      return newHeight;
-    });
+        // Update stage, but no rewards for stage advancement
+        if (nextStage !== currentStage) {
+          setCurrentStage(nextStage);
+          console.log("Plant advanced to the next stage:", nextStage.label);
+        }
 
-    setTimeout(() => {
-      setIsWatered(false);
-    }, 30000); // 30 seconds
-  };
+        return newHeight;
+      });
 
-  const predictWateringNeed = useCallback(async () => {
-    if (modelRef.current) {
-      const soilMoisture = tf.scalar(Math.random() * 0.3 + 0.1);
-      const temperature = tf.scalar(72);
-      const humidity = tf.scalar(Math.random() * 30 + 20);
-      const lightExposure = tf.scalar(0.5);
-      const input = tf.stack([soilMoisture, temperature, humidity, lightExposure], 0).reshape([1, 4]);
+      setTimeout(() => {
+        setIsWatered(false);
+        setWateringInProgress(false);
+      }, 30000);
+    },
+    [wateringInProgress, currentStage]
+  );
 
+  // AI prediction for watering
+  const predictAndWater = useCallback(async () => {
+    console.log("AI Predict and Water Triggered");
+
+    if (!modelRef.current || wateringInProgress || isWatered) return;
+
+    const soilMoisture = Math.random() * 0.2 + 0.1;
+    const temperature = 72;
+    const lightExposure = 0.5;
+
+    try {
+      const input = tf.tensor2d([[soilMoisture, temperature, lightExposure]]);
       const prediction = modelRef.current.predict(input);
       const result = (await prediction.data())[0];
+
+      console.log("AI Prediction Result:", result);
+
       input.dispose();
       prediction.dispose();
-      soilMoisture.dispose();
-      temperature.dispose();
-      humidity.dispose();
-      lightExposure.dispose();
 
-      return result > 0.5;
+      if (result > 0.1) {
+        console.log("AI decides to water.");
+        waterPlant(true); // AI waters
+      }
+    } catch (error) {
+      console.error("Error during AI prediction:", error);
     }
-    return false;
-  }, []);
+  }, [waterPlant, wateringInProgress, isWatered]);
 
   useEffect(() => {
-    const intervalId = setInterval(async () => {
-      if (!isWatered) {
-        const needsWater = await predictWateringNeed();
-        if (needsWater) {
-          waterPlant(true); // AI waters the plant
-        } else {
-          setRewardPoints(prevPoints => prevPoints + PUNISHMENT_FOR_UNDERWATERING);
-        }
-      }
-    }, 30000); // 30 seconds
+    wateringTimerRef.current = setInterval(() => {
+      predictAndWater();
+    }, WATERING_INTERVAL);
 
-    wateringIntervalRef.current = intervalId;
-
-    return () => clearInterval(intervalId);
-  }, [isWatered, predictWateringNeed, waterPlant]);
-
-  const notifyUserGoalAchieved = () => {
-    window.alert('Congratulations! Your plant has reached the 7th stage.');
-  };
+    return () => clearInterval(wateringTimerRef.current);
+  }, [predictAndWater]);
 
   return (
-    <div className='home'>
-      <div className='content'>
-        <div className='plant'>
-          <div className='Water' style={{ width: '300px', height: '400px', backgroundColor: isWatered ? 'green' : 'red' }}>
-
-            <img className='can' src={currentStage.image} alt='Plant' />
+    <div className="home">
+      <div className="content">
+        <div className="plant">
+          <div
+            className="Water"
+            style={{
+              width: '300px',
+              height: '400px',
+              backgroundColor: isWatered ? 'green' : 'red',
+            }}
+          >
+            <img className="can" src={currentStage.image} alt="Plant" />
           </div>
-          <div className='Info'>
-            <h3>Name of the AI: Bimbo</h3>
-            <img className='Bimbo' src='/images/Bimbo.png' alt='Bimbos face' />
+          <div className="Info">
+            <h3>Name of the AI: Mr. Bim Bo</h3>
+            <img className="Bimbo" src="/images/Bimbo.png" alt="Bimbo's face" />
             <br />
-            <h3>Name of plant: Gerald the Snake plant</h3>
+            <h3>Name of plant: Gerald the Snake Plant</h3>
             Current Height: {height} cm
             <br />
-            Reward Points: {rewardPoints}
+            Reward Points: {rewardPoints.toFixed(1)}
           </div>
         </div>
-        <button onClick={waterPlant} className='WaterCan'>
-          <img src='/images/watering.PNG' alt='watering' />
+        <button onClick={() => waterPlant(false)} className="WaterCan">
+          <img src="/images/watering.PNG" alt="watering" />
         </button>
       </div>
-      <Link to="/seed"><button className='Seed'><img src='/images/Seeds.png' alt='Seeds' /></button></Link>
+      <Link to="/seed">
+        <button className="Seed">
+          <img src="/images/Seeds.png" alt="Seeds" />
+        </button>
+      </Link>
     </div>
   );
 }
+
 export default Home;
