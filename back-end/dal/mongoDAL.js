@@ -80,6 +80,7 @@ exports.DAL = {
         return await Plant.findById(plantId).populate('logID').exec();
     },
 
+<<<<<<< Updated upstream
     createLog: async (logData) => {
         const log = new Log(logData);
         const savedLog = await log.save();
@@ -108,3 +109,25 @@ exports.DAL = {
     }
     
 };
+=======
+// const createAILog = async (logData) => {
+//     try {
+//         const log = new Log(logData);
+//         const savedLog = await log.save();
+//         await Plant.findByIdAndUpdate(logData.plantId, { $push: { logID: savedLog._id } });
+//         return savedLog;
+//     } catch (error) {
+//         console.error('Error creating AI log:', error);
+//         throw error;
+//     }
+// };
+
+module.exports = {
+    createPlant,
+    getPlantById,
+    createLog,
+    getLogsByPlantId,
+    getAllLogs,
+    // createAILog
+};
+>>>>>>> Stashed changes
