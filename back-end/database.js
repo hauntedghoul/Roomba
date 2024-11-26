@@ -29,7 +29,7 @@ app.post('/api/logs', async (req, res) => {
   }
 });
 
-<<<<<<< Updated upstream
+
 app.post('/api/ai-logs', async (req, res) => {
   try {
     const log = await DAL.createAILog(req.body);
@@ -38,7 +38,7 @@ app.post('/api/ai-logs', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-=======
+
 // app.post('/api/ai-logs', async (req, res) => {
 //     try {
 //         const log = await createAILog(req.body);
@@ -48,7 +48,7 @@ app.post('/api/ai-logs', async (req, res) => {
 //         res.status(500).json({ error: error.message });
 //     }
 // });
->>>>>>> Stashed changes
+
 
 
 app.get('/api/plants/:id', async (req, res) => {

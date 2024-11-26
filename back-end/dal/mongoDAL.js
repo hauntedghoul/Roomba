@@ -80,7 +80,7 @@ exports.DAL = {
         return await Plant.findById(plantId).populate('logID').exec();
     },
 
-<<<<<<< Updated upstream
+
     createLog: async (logData) => {
         const log = new Log(logData);
         const savedLog = await log.save();
@@ -109,7 +109,7 @@ exports.DAL = {
     }
     
 };
-=======
+
 // const createAILog = async (logData) => {
 //     try {
 //         const log = new Log(logData);
@@ -130,4 +130,3 @@ module.exports = {
     getAllLogs,
     // createAILog
 };
->>>>>>> Stashed changes
