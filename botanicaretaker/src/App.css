@@ -1,10 +1,12 @@
-body{
+body {
     margin: 0px;
-    background-size: cover;
-    background-position: center;
-    background-image: url('https://i.pinimg.com/736x/e5/a2/89/e5a28990030a33d9617a5a8ac24b62c7.jpg'); 
+    background-image: url('https://i.pinimg.com/736x/86/c7/0e/86c70e57233f79c49cde10f112fe061e.jpg');
     background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    background-size: 100% 100%;
 }
+
 
 .Underconstruction{
     margin-left:400px;
