@@ -80,14 +80,6 @@ exports.DAL = {
         return await Plant.findById(plantId).populate('logID').exec();
     },
 
-
-    createLog: async (logData) => {
-        const log = new Log(logData);
-        const savedLog = await log.save();
-        await Plant.findByIdAndUpdate(logData.plantId, {$push: { logID: savedLog._id } });
-        return savedLog;
-    },
-
     getLogsByPlantId: async (plantId) => {
         return await Log.find({ plantId }).exec();
     },
@@ -125,7 +117,6 @@ exports.DAL = {
 module.exports = {
     createPlant,
     getPlantById,
-    createLog,
     getLogsByPlantId,
     getAllLogs,
     // createAILog

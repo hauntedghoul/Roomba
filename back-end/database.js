@@ -18,26 +18,26 @@ app.post('/api/plants', async (req, res) => {
   }
 });
 
-app.post('/api/logs', async (req, res) => {
-  try {
-    const log = await DAL.createLog(req.body);
-    console.log('Log created:', log); // Log the created log
-    res.status(201).json(log); // Send the created log as JSON response
-  } catch (error) {
-    console.error('Error creating log:', error); // Log the error
-    res.status(500).json({ error: error.message }); // Send error as JSON response
-  }
-});
+// app.post('/api/logs', async (req, res) => {
+//   try {
+//     const log = await DAL.createLog(req.body);
+//     console.log('Log created:', log); // Log the created log
+//     res.status(201).json(log); // Send the created log as JSON response
+//   } catch (error) {
+//     console.error('Error creating log:', error); // Log the error
+//     res.status(500).json({ error: error.message }); // Send error as JSON response
+//   }
+// });
 
 
-app.post('/api/ai-logs', async (req, res) => {
-  try {
-    const log = await DAL.createAILog(req.body);
-    res.status(201).json(log);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// app.post('/api/ai-logs', async (req, res) => {
+//   try {
+//     const log = await DAL.createAILog(req.body);
+//     res.status(201).json(log);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 // app.post('/api/ai-logs', async (req, res) => {
 //     try {
