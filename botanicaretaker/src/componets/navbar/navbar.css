@@ -8,6 +8,7 @@
 
 
 .title{
+  margin-top: -5px;
   font-family: "Jolly Lodger", system-ui;
   font-size: 80px;
   font-weight: 700;
@@ -27,6 +28,7 @@
 
 nav {
     background-color: transparent;
+    margin-bottom: 40px;
   }
   
   nav ul {
@@ -51,4 +53,8 @@ nav {
   width: 150px;
   height: 50px;
 }  
+
+li{
+  height: 50px;
+}
 
