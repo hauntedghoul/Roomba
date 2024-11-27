@@ -49,10 +49,11 @@ function Logs() {
              
             </tr>
           ))}
-          <hr className='line'/>
+          
         </tbody>
         
       </table>
+      <hr className='line'/>
       <button className='btn' onClick={clearLogs}>Clear Logs</button>
     </div>
   );
