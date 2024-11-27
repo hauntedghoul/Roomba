@@ -19,7 +19,6 @@ function Navbar() {
           <Link to="/save"><img className='NavImg' src='/images/Save.PNG' /></Link>
         </li>
       </ul>
-      <img className='Shelf' src='images/shelf.png' alt='shelf' />  
     </nav>
   );
 }
