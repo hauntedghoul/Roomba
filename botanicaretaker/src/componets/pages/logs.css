@@ -1,14 +1,42 @@
-.container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    height: 70vh;
-  }
+
+@import url('https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&family=Jolly+Lodger&display=swap');
+
+
+.logCon {
+  font-family: 'Arial', sans-serif;
+  background-color: #9e8241;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.jolly-lodger-regular {
+  font-family: "Jolly Lodger", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.line {
+  border: none; 
+  height: 6px; 
+  background-color: #431a1a; 
+  width: 100%; 
+  max-width: 800px;
   
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
+}
+
+
+.header {
+  -webkit-text-stroke: .5px white;
+  font-family: "Jolly Lodger", system-ui;
+  color: black;
+  font-size: 70px;
+  text-align: center;
+  margin-bottom: 20px;
   }
   
   table {
@@ -19,7 +47,10 @@
   th,
   td {
     padding: 10px;
-    border-bottom: 1px solid #ddd;
+    font-family: "Jolly Lodger", system-ui;
+    font-size: xxx-large;
+    -webkit-text-stroke: .5px black;
+    /* border-bottom: 1px solid #ddd; */
   }
   
   th {
@@ -27,16 +58,9 @@
     text-align: left;
   }
   
-  tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
   
-  tr:hover {
-    background-color: #ddd;
-  }
-  
-  button {
-    background-color: #4CAF50;
+.btn {
+    background-color: black;
     color: #fff;
     padding: 10px 20px;
     border: none;
@@ -46,6 +70,6 @@
     margin-top: 20px;
   }
   
-  button:hover {
-    background-color: #3e8e41;
+.btn:hover {
+    background-color: darkgreen;
   }

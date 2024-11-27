@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './logs.css';
 
+
 function Logs() {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState(null);
@@ -26,8 +27,8 @@ function Logs() {
   };
 
   return (
-    <div className="container">
-      <h1>Logs</h1>
+    <div className="logCon">
+      <h1 className='header'>Logs</h1>
       {error && <p className="error">{error}</p>}
       <table>
         <thead>
@@ -38,18 +39,21 @@ function Logs() {
             <th>Date</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className='tb'>
           {logs.map((log, index) => (
             <tr key={index}>
               <td>{log.stage}</td>
               <td>{log.height}</td>
               <td>{log.health}</td>
               <td>{new Date(log.time).toLocaleString()}</td>
+             
             </tr>
           ))}
+          <hr className='line'/>
         </tbody>
+        
       </table>
-      <button onClick={clearLogs}>Clear Logs</button>
+      <button className='btn' onClick={clearLogs}>Clear Logs</button>
     </div>
   );
 }

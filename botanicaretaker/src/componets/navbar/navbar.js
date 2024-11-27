@@ -7,7 +7,7 @@ function Navbar() {
     <nav>
       <ul>
         <li>
-          <Link to="/"><h2>Botani Caretaker</h2></Link>
+          <Link to="/"><h2 className='title'>Botani Caretaker</h2></Link>
         </li>
         <li>
           <Link to="/logs"><img className='NavImg' src='/images/Logs.PNG' /></Link>
