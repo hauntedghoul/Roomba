@@ -1,3 +1,4 @@
+
 .home {
     display: flex;
     justify-content: center;
@@ -17,8 +18,9 @@
   
 .plant {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    margin-top: 400px;
+    /* justify-content: center;
+    align-items: center; */
     flex: 1;
 }
   
@@ -36,7 +38,7 @@
   
 .WaterCan {
     position: absolute;
-    bottom: 1px;
+    bottom: -15px;
     left: 10px;
     background: none;
     border: none;
@@ -48,8 +50,9 @@
 .WaterCan img {
     display: block;
     width: 100%;
-    height: 100px;
+    height: 200px;
     transition: transform 0.3s ease; 
+    
 }
   
 .WaterCan:hover {
@@ -65,7 +68,7 @@
 
 .Seed{
     position: absolute;
-    bottom: 1px;
+    bottom: -5px;
     float: right;
     right: 15px;
     background: none;
@@ -82,8 +85,8 @@
 
 .Seed img {
     display: block;
-    width: 180px;
-    height: 200px;
+    width: 200px;
+    height: 220px;
     transition: transform 0.3s ease; 
 }
 
@@ -91,4 +94,12 @@
     background-color: tan;
     padding: 5px;
     border:2px black solid;
+}
+
+.Shelf {
+    position: absolute;
+    bottom: -100px;
+    width: 100%;
+    height: 100px;
+    z-index: 1;
 }

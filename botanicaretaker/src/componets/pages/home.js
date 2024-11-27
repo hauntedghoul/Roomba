@@ -223,6 +223,7 @@ const currentStageRef = useRef(currentStage);
           <img src="/images/Seeds.png" alt="Seeds" />
         </button>
       </Link>
+      <img className='Shelf' src='images/shelf.png' alt='shelf' />  
     </div>
   );
 }
