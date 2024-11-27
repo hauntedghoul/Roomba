@@ -23,9 +23,11 @@ function Home() {
   const modelRef = useRef(null);
   const logTimerRef = useRef(null);
   const wateringTimerRef = useRef(null);
+  const heightRef = useRef(height);
+const currentStageRef = useRef(currentStage);
 
   const WATERING_INTERVAL = 30000; // 30 seconds
-  const LOGGING_INTERVAL = 5 * 60 * 1000; // 5 minutes
+  const LOGGING_INTERVAL = 2 * 60 * 1000; // 2 minutes
 
   // Train AI model
   const trainModel = useCallback(async () => {
@@ -60,25 +62,50 @@ function Home() {
     trainModel();
   }, [trainModel]);
 
+  useEffect(() => {
+    heightRef.current = height;
+    currentStageRef.current = currentStage;
+  }, [height, currentStage]);  
+
   // Log environment state periodically
   const logEnvironment = useCallback(() => {
+    const readableTimestamp = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date());
+  
     const environmentLog = {
-      timestamp: new Date().toISOString(),
-      soilMoisture: Math.random() * 0.2 + 0.1,
-      temperature: 72,
-      lightExposure: 0.5,
+      timestamp: readableTimestamp, // Human-readable format
+      soilMoisture: Math.random() * 0.2 + 0.1, // Simulated soil moisture
+      temperature: 72, // Constant value
+      lightExposure: 0.5, // Simulated light exposure
+      plant: {
+        height: heightRef.current, // Use ref instead of state
+        stage: currentStageRef.current.label, // Use ref instead of state
+      },
     };
-
+  
     console.log('Environment Log:', JSON.stringify(environmentLog, null, 2));
-  }, []);
-
+  }, []); // No dependencies to avoid recreation
+  
   useEffect(() => {
+    console.log("Setting up environment logging interval");
+  
     logTimerRef.current = setInterval(() => {
+      console.log("Executing environment log...");
       logEnvironment();
     }, LOGGING_INTERVAL);
-
-    return () => clearInterval(logTimerRef.current);
-  }, [logEnvironment, LOGGING_INTERVAL]);
+  
+    // Cleanup interval on unmount
+    return () => {
+      console.log("Clearing environment logging interval");
+      clearInterval(logTimerRef.current);
+    };
+  }, [logEnvironment]); // logEnvironment has no dependencies
 
   // Determine current stage of growth
   const getCurrentStage = (height) => {
