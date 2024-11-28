@@ -34,7 +34,6 @@ function Home() {
   const logTimerRef = useRef(null);
   const wateringTimerRef = useRef(null);
   const heightRef = useRef(height);
-  const currentStageRef = useRef(currentStage);
 
   const WATERING_INTERVAL = 30000; // 30 seconds
   const LOGGING_INTERVAL = 2 * 60 * 1000; // 2 minutes
@@ -73,8 +72,7 @@ function Home() {
 
   useEffect(() => {
     heightRef.current = height;
-    currentStageRef.current = currentStage;
-  }, [height, currentStage]);
+  }, [height]);
 
   const logEnvironment = useCallback(() => {
     const readableTimestamp = new Intl.DateTimeFormat('en-US', {
@@ -93,12 +91,12 @@ function Home() {
       lightExposure: 0.5,
       plant: {
         height: heightRef.current,
-        stage: currentStageRef.current.label,
+        stage: currentStage.label,
       },
     };
 
     console.log('Environment Log:', JSON.stringify(environmentLog, null, 2));
-  }, []);
+  }, [currentStage]);
 
   useEffect(() => {
     logTimerRef.current = setInterval(() => {
@@ -130,9 +128,7 @@ function Home() {
           setRewardPoints((prev) => prev + 1 - 0.5);
         }
 
-        if (nextStage !== currentStage) {
-          setCurrentStage(nextStage);
-        }
+        setCurrentStage(nextStage);
 
         return newHeight;
       });
@@ -142,7 +138,7 @@ function Home() {
         setWateringInProgress(false);
       }, 30000);
     },
-    [wateringInProgress, currentStage, isCactus]
+    [wateringInProgress, isCactus]
   );
 
   const predictAndWater = useCallback(async () => {
@@ -176,6 +172,13 @@ function Home() {
     return () => clearInterval(wateringTimerRef.current);
   }, [predictAndWater]);
 
+  // Update the current stage immediately when plant type changes
+  useEffect(() => {
+    const stages = isCactus ? cactusGrowthStages : growthStages;
+    const updatedStage = getCurrentStage(height, stages);
+    setCurrentStage(updatedStage);
+  }, [isCactus, height]);
+
   return (
     <div className="home">
       <div className="content">
@@ -189,10 +192,11 @@ function Home() {
             }}
           >
             <button onClick={() => setIsCactus((prev) => !prev)}>
-              Toggle Plant Type
-            </button>
+        Toggle Plant Type
+      </button>
             <img className="can" src={currentStage.image} alt="Plant" />
           </div>
+          
           <div className="Info">
             <h3>Name of the AI: Mr. Bim Bo</h3>
             <img className="Bimbo" src="/images/Bimbo.png" alt="Bimbo's face" />
@@ -207,10 +211,10 @@ function Home() {
           <img src="/images/watering.PNG" alt="watering" />
         </button>
       </div>
-
+      
       <Link to="/seed">
         <button className="Seed">
-          <img src="/images/Seeds.png" alt="Seeds" />
+          <img src="/images/Seeds.PNG" alt="seed" />
         </button>
       </Link>
       <img className="Shelf" src="images/shelf.png" alt="shelf" />
