@@ -24,16 +24,26 @@ const cactusGrowthStages = [
 
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
-  const [height, setHeight] = useState(20); // Initial height in cm
-  const [currentStage, setCurrentStage] = useState(growthStages[0]);
   const [rewardPoints, setRewardPoints] = useState(0);
-  const [wateringInProgress, setWateringInProgress] = useState(false); // Guard flag
+  const [wateringInProgress, setWateringInProgress] = useState(false);
   const [isCactus, setIsCactus] = useState(false); // Toggle for plant type
 
   const modelRef = useRef(null);
   const logTimerRef = useRef(null);
   const wateringTimerRef = useRef(null);
-  const heightRef = useRef(height);
+
+  // Individual plant states
+  const [snakePlantState, setSnakePlantState] = useState({
+    height: 20,
+    currentStage: growthStages[0],
+  });
+
+  const [cactusState, setCactusState] = useState({
+    height: 20,
+    currentStage: cactusGrowthStages[0],
+  });
+
+  const { height, currentStage } = isCactus ? cactusState : snakePlantState;
 
   const WATERING_INTERVAL = 30000; // 30 seconds
   const LOGGING_INTERVAL = 2 * 60 * 1000; // 2 minutes
@@ -70,42 +80,6 @@ function Home() {
     trainModel();
   }, [trainModel]);
 
-  useEffect(() => {
-    heightRef.current = height;
-  }, [height]);
-
-  const logEnvironment = useCallback(() => {
-    const readableTimestamp = new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }).format(new Date());
-
-    const environmentLog = {
-      timestamp: readableTimestamp,
-      soilMoisture: Math.random() * 0.2 + 0.1,
-      temperature: 72,
-      lightExposure: 0.5,
-      plant: {
-        height: heightRef.current,
-        stage: currentStage.label,
-      },
-    };
-
-    console.log('Environment Log:', JSON.stringify(environmentLog, null, 2));
-  }, [currentStage]);
-
-  useEffect(() => {
-    logTimerRef.current = setInterval(() => {
-      logEnvironment();
-    }, LOGGING_INTERVAL);
-
-    return () => clearInterval(logTimerRef.current);
-  }, [logEnvironment]);
-
   const getCurrentStage = (height, stages) => {
     return stages.find(
       (stage) => height >= stage.minHeight && height <= stage.maxHeight
@@ -119,18 +93,18 @@ function Home() {
       setWateringInProgress(true);
       setIsWatered(true);
 
-      setHeight((prevHeight) => {
-        const newHeight = prevHeight + 3;
-        const stages = isCactus ? cactusGrowthStages : growthStages;
+      const setPlantState = isCactus ? setCactusState : setSnakePlantState;
+      const stages = isCactus ? cactusGrowthStages : growthStages;
+
+      setPlantState((prevState) => {
+        const newHeight = prevState.height + 3;
         const nextStage = getCurrentStage(newHeight, stages);
 
         if (isAi) {
           setRewardPoints((prev) => prev + 1 - 0.5);
         }
 
-        setCurrentStage(nextStage);
-
-        return newHeight;
+        return { height: newHeight, currentStage: nextStage };
       });
 
       setTimeout(() => {
@@ -172,12 +146,9 @@ function Home() {
     return () => clearInterval(wateringTimerRef.current);
   }, [predictAndWater]);
 
-  // Update the current stage immediately when plant type changes
-  useEffect(() => {
-    const stages = isCactus ? cactusGrowthStages : growthStages;
-    const updatedStage = getCurrentStage(height, stages);
-    setCurrentStage(updatedStage);
-  }, [isCactus, height]);
+  const togglePlantType = () => {
+    setIsCactus((prev) => !prev);
+  };
 
   return (
     <div className="home">
@@ -191,12 +162,10 @@ function Home() {
               backgroundColor: isWatered ? 'green' : 'red',
             }}
           >
-            <button onClick={() => setIsCactus((prev) => !prev)}>
-        Toggle Plant Type
-      </button>
+            <button onClick={togglePlantType}>Toggle Plant Type</button>
             <img className="can" src={currentStage.image} alt="Plant" />
           </div>
-          
+
           <div className="Info">
             <h3>Name of the AI: Mr. Bim Bo</h3>
             <img className="Bimbo" src="/images/Bimbo.png" alt="Bimbo's face" />
@@ -211,7 +180,7 @@ function Home() {
           <img src="/images/watering.PNG" alt="watering" />
         </button>
       </div>
-      
+
       <Link to="/seed">
         <button className="Seed">
           <img src="/images/Seeds.PNG" alt="seed" />
