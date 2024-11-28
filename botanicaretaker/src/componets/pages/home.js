@@ -29,24 +29,26 @@ function Home() {
   const [isCactus, setIsCactus] = useState(false); // Toggle for plant type
 
   const modelRef = useRef(null);
-  const logTimerRef = useRef(null);
-  const wateringTimerRef = useRef(null);
 
-  // Individual plant states
-  const [snakePlantState, setSnakePlantState] = useState({
+  // Initial states for both plants
+  const initialSnakePlantState = {
     height: 20,
     currentStage: growthStages[0],
-  });
+  };
 
-  const [cactusState, setCactusState] = useState({
+  const initialCactusState = {
     height: 20,
     currentStage: cactusGrowthStages[0],
-  });
+  };
 
+  // Plant states
+  const [snakePlantState, setSnakePlantState] = useState(initialSnakePlantState);
+  const [cactusState, setCactusState] = useState(initialCactusState);
+
+  // Get the current plant's state
   const { height, currentStage } = isCactus ? cactusState : snakePlantState;
 
   const WATERING_INTERVAL = 30000; // 30 seconds
-  const LOGGING_INTERVAL = 2 * 60 * 1000; // 2 minutes
 
   const trainModel = useCallback(async () => {
     const soilMoisture = tf.randomUniform([200], 0.1, 0.5);
@@ -86,68 +88,36 @@ function Home() {
     );
   };
 
-  const waterPlant = useCallback(
-    (isAi = false) => {
-      if (wateringInProgress) return;
+  const waterPlant = useCallback(() => {
+    if (wateringInProgress) return;
 
-      setWateringInProgress(true);
-      setIsWatered(true);
+    setWateringInProgress(true);
+    setIsWatered(true);
 
-      const setPlantState = isCactus ? setCactusState : setSnakePlantState;
-      const stages = isCactus ? cactusGrowthStages : growthStages;
+    const setPlantState = isCactus ? setCactusState : setSnakePlantState;
+    const stages = isCactus ? cactusGrowthStages : growthStages;
 
-      setPlantState((prevState) => {
-        const newHeight = prevState.height + 3;
-        const nextStage = getCurrentStage(newHeight, stages);
+    setPlantState((prevState) => {
+      const newHeight = prevState.height + 3;
+      const nextStage = getCurrentStage(newHeight, stages);
 
-        if (isAi) {
-          setRewardPoints((prev) => prev + 1 - 0.5);
-        }
+      return { height: newHeight, currentStage: nextStage };
+    });
 
-        return { height: newHeight, currentStage: nextStage };
-      });
-
-      setTimeout(() => {
-        setIsWatered(false);
-        setWateringInProgress(false);
-      }, 30000);
-    },
-    [wateringInProgress, isCactus]
-  );
-
-  const predictAndWater = useCallback(async () => {
-    if (!modelRef.current || wateringInProgress || isWatered) return;
-
-    const soilMoisture = Math.random() * 0.2 + 0.1;
-    const temperature = 72;
-    const lightExposure = 0.5;
-
-    try {
-      const input = tf.tensor2d([[soilMoisture, temperature, lightExposure]]);
-      const prediction = modelRef.current.predict(input);
-      const result = (await prediction.data())[0];
-
-      input.dispose();
-      prediction.dispose();
-
-      if (result > 0.1) {
-        waterPlant(true);
-      }
-    } catch (error) {
-      console.error('Error during AI prediction:', error);
-    }
-  }, [waterPlant, wateringInProgress, isWatered]);
-
-  useEffect(() => {
-    wateringTimerRef.current = setInterval(() => {
-      predictAndWater();
-    }, WATERING_INTERVAL);
-
-    return () => clearInterval(wateringTimerRef.current);
-  }, [predictAndWater]);
+    setTimeout(() => {
+      setIsWatered(false);
+      setWateringInProgress(false);
+    }, 30000);
+  }, [wateringInProgress, isCactus]);
 
   const togglePlantType = () => {
+    if (isCactus) {
+      setCactusState(initialCactusState); // Reset cactus state
+    } else {
+      setSnakePlantState(initialSnakePlantState); // Reset snake plant state
+    }
     setIsCactus((prev) => !prev);
+    setRewardPoints(0); // Reset reward points
   };
 
   return (
@@ -176,7 +146,7 @@ function Home() {
             Reward Points: {rewardPoints.toFixed(1)}
           </div>
         </div>
-        <button onClick={() => waterPlant(false)} className="WaterCan">
+        <button onClick={waterPlant} className="WaterCan">
           <img src="/images/watering.PNG" alt="watering" />
         </button>
       </div>
