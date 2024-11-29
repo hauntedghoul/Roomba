@@ -24,31 +24,30 @@ const cactusGrowthStages = [
 
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
+  const [currentStage, setCurrentStage] = useState(growthStages[0]);
   const [rewardPoints, setRewardPoints] = useState(0);
-  const [wateringInProgress, setWateringInProgress] = useState(false);
-  const [isCactus, setIsCactus] = useState(false); // Toggle for plant type
+  const [wateringInProgress, setWateringInProgress] = useState(false); 
+  const [isCactus, setIsCactus] = useState(false); 
 
   const modelRef = useRef(null);
+  const logTimerRef = useRef(null);
+  const wateringTimerRef = useRef(null);
 
-  // Initial states for both plants
-  const initialSnakePlantState = {
-    height: 20,
-    currentStage: growthStages[0],
-  };
+  const WATERING_INTERVAL = 30000; 
+  const LOGGING_INTERVAL = 2 * 60 * 1000; 
 
   const initialCactusState = {
     height: 20,
     currentStage: cactusGrowthStages[0],
   };
 
-  // Plant states
-  const [snakePlantState, setSnakePlantState] = useState(initialSnakePlantState);
+  const initialSnakePlantState = {
+    height: 20,
+    currentStage: growthStages[0],
+  };
+
   const [cactusState, setCactusState] = useState(initialCactusState);
-
-  // Get the current plant's state
-  const { height, currentStage } = isCactus ? cactusState : snakePlantState;
-
-  const WATERING_INTERVAL = 30000; // 30 seconds
+  const [snakePlantState, setSnakePlantState] = useState(initialSnakePlantState);
 
   const trainModel = useCallback(async () => {
     const soilMoisture = tf.randomUniform([200], 0.1, 0.5);
@@ -82,58 +81,114 @@ function Home() {
     trainModel();
   }, [trainModel]);
 
-  const getCurrentStage = (height, stages) => {
-    return stages.find(
-      (stage) => height >= stage.minHeight && height <= stage.maxHeight
-    );
-  };
+  const logEnvironment = useCallback(() => {
+    const readableTimestamp = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date());
 
-  const waterPlant = useCallback(() => {
-    if (wateringInProgress) return;
+    const environmentLog = {
+      timestamp: readableTimestamp,
+      soilMoisture: Math.random() * 0.2 + 0.1, 
+      temperature: 72,
+      lightExposure: 0.5,
+      plant: {
+        height: isCactus ? cactusState.height : snakePlantState.height,
+        stage: isCactus ? cactusState.currentStage.label : snakePlantState.currentStage.label,
+      },
+    };
 
-    setWateringInProgress(true);
-    setIsWatered(true);
+    console.log('Environment Log:', JSON.stringify(environmentLog, null, 2));
+  }, [isCactus, cactusState, snakePlantState]);
 
-    const setPlantState = isCactus ? setCactusState : setSnakePlantState;
-    const stages = isCactus ? cactusGrowthStages : growthStages;
+  useEffect(() => {
+    logTimerRef.current = setInterval(() => {
+      logEnvironment();
+    }, LOGGING_INTERVAL);
 
-    setPlantState((prevState) => {
-      const newHeight = prevState.height + 3;
-      const nextStage = getCurrentStage(newHeight, stages);
+    return () => clearInterval(logTimerRef.current);
+  }, [logEnvironment]);
 
-      return { height: newHeight, currentStage: nextStage };
-    });
+  const waterPlant = useCallback(
+    (isAi = false) => {
+      if (wateringInProgress) return;
 
-    setTimeout(() => {
-      setIsWatered(false);
-      setWateringInProgress(false);
-    }, 30000);
-  }, [wateringInProgress, isCactus]);
+      setWateringInProgress(true);
+      setIsWatered(true);
+
+      const stages = isCactus ? cactusGrowthStages : growthStages;
+      const setPlantState = isCactus ? setCactusState : setSnakePlantState;
+
+      setPlantState((prevState) => {
+        const newHeight = prevState.height + 3;
+        const nextStage = stages.find(
+          (stage) => newHeight >= stage.minHeight && newHeight <= stage.maxHeight
+        );
+
+        if (isAi) {
+          setRewardPoints((prev) => prev + 0.5);
+        }
+
+        if (nextStage !== prevState.currentStage) {
+          setCurrentStage(nextStage);
+        }
+
+        return { height: newHeight, currentStage: nextStage };
+      });
+
+      setTimeout(() => {
+        setIsWatered(false);
+        setWateringInProgress(false);
+      }, 30000);
+    },
+    [wateringInProgress, isCactus]
+  );
+
+  useEffect(() => {
+    wateringTimerRef.current = setInterval(() => {
+      if (!modelRef.current || wateringInProgress || isWatered) return;
+
+      const soilMoisture = Math.random() * 0.2 + 0.1;
+      const temperature = 72;
+      const lightExposure = 0.5;
+
+      const input = tf.tensor2d([[soilMoisture, temperature, lightExposure]]);
+      const prediction = modelRef.current.predict(input);
+
+      prediction.data().then((result) => {
+        if (result[0] > 0.1) waterPlant(true);
+        input.dispose();
+        prediction.dispose();
+      });
+    }, WATERING_INTERVAL);
+
+    return () => clearInterval(wateringTimerRef.current);
+  }, [waterPlant, wateringInProgress, isWatered]);
 
   const togglePlantType = () => {
     if (isCactus) {
-      setCactusState(initialCactusState); // Reset cactus state
+      setSnakePlantState(initialSnakePlantState);
     } else {
-      setSnakePlantState(initialSnakePlantState); // Reset snake plant state
+      setCactusState(initialCactusState);
     }
     setIsCactus((prev) => !prev);
-    setRewardPoints(0); // Reset reward points
   };
 
   return (
     <div className="home">
       <div className="content">
         <div className="plant">
-          <div
-            className="Water"
-            style={{
-              width: '300px',
-              height: '400px',
-              backgroundColor: isWatered ? 'green' : 'red',
-            }}
-          >
+          <div className="Water" style={{ width: '300px', height: '400px'}}>
             <button onClick={togglePlantType}>Toggle Plant Type</button>
-            <img className="can" src={currentStage.image} alt="Plant" />
+            <img
+              className="can"
+              src={isCactus ? cactusState.currentStage.image : snakePlantState.currentStage.image}
+              alt="Plant"
+            />
           </div>
 
           <div className="Info">
@@ -141,12 +196,12 @@ function Home() {
             <img className="Bimbo" src="/images/Bimbo.png" alt="Bimbo's face" />
             <br />
             <h3>Name of plant: {isCactus ? 'Cactus Gerald' : 'Snake Plant Gerald'}</h3>
-            Current Height: {height} cm
+            Current Height: {isCactus ? cactusState.height : snakePlantState.height} cm
             <br />
             Reward Points: {rewardPoints.toFixed(1)}
           </div>
         </div>
-        <button onClick={waterPlant} className="WaterCan">
+        <button onClick={() => waterPlant(false)} className="WaterCan">
           <img src="/images/watering.PNG" alt="watering" />
         </button>
       </div>
@@ -156,7 +211,7 @@ function Home() {
           <img src="/images/Seeds.PNG" alt="seed" />
         </button>
       </Link>
-      <img className="Shelf" src="images/shelf.png" alt="shelf" />
+      <img className="Shelf" src="/images/shelf.png" alt="shelf" />
     </div>
   );
 }

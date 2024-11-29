@@ -18,9 +18,7 @@
   
 .plant {
     display: flex;
-    margin-top: 350px;
-    /* justify-content: center;
-    align-items: center; */
+    margin-top: 270px;
     flex: 1;
 }
   
@@ -28,7 +26,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: blue;
 }
   
 .can {
@@ -39,7 +36,7 @@
   
 .WaterCan {
     position: absolute;
-    bottom: -15px;
+    bottom: 5px;
     left: 10px;
     background: none;
     border: none;
@@ -64,12 +61,12 @@
 .Bimbo{
     width: 250px;
     height: 200px;
-    margin: 5px;
+    margin-left: 15px;
 }
 
 .Seed{
     position: absolute;
-    bottom: -5px;
+    bottom: 41px;
     float: right;
     right: 15px;
     background: none;
@@ -92,14 +89,19 @@
 }
 
 .Info{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
     background-color: tan;
     padding: 5px;
     border:2px black solid;
+    height: 400px;
+    width: 300px;
 }
 
 .Shelf {
     position: absolute;
-    bottom: -90px;
+    bottom: -50px;
     width: 100%;
     height: 100px;
     z-index: 1;
