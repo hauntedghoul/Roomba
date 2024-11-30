@@ -8,7 +8,7 @@
   padding: 50px;
   border: #4c3427 12px solid;
   border-radius: 45px;
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -41,23 +41,27 @@
   }
   
   table {
-    width: 100%;
+    margin: 0 auto; /* Center the table */
     border-collapse: collapse;
+    max-width: 100%; /* Ensure it fits within the container */
+    white-space: nowrap; /* Prevent wrapping */
   }
   
   th,
   td {
     padding: 10px;
     font-family: "Jolly Lodger", system-ui;
-    font-size: xxx-large;
-    -webkit-text-stroke: .5px black;
-    /* border-bottom: 1px solid #ddd; */
+    font-size: xx-large;
+    -webkit-text-stroke: 0.5px black;
+    text-align: center; /* Center the text in each cell */
   }
   
   th {
     font-weight: bold;
-    text-align: left;
+    background-color: #4c3427; /* Optional: Add contrast for headers */
+    color: white;
   }
+  
   
   
 .btn {

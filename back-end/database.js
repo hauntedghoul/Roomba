@@ -1,66 +1,43 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const { createPlant, getPlantById, createLog, getLogsByPlantId, getAllLogs, createAILog } = require('./dal/mongoDAL');
+const express = require('express'); // Import express
+const bodyParser = require('body-parser'); // Import body-parser
+const cors = require('cors'); // Import cors
+const { getAllLogs, addLog, getLogsByPlantId } = require('./jsonFile'); // Import your JSON handlers
 
-const app = express();
-const port = 4206;
+const app = express(); // Initialize app
+const port = 4206; // Define the port
 
+// Middleware setup
 app.use(cors());
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb+srv://mmitchell:Tuff12top@cluster0.fm4mkz2.mongodb.net/Roomba', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+// Define routes
 
-app.post('/api/plants', async (req, res) => {
+// Endpoint to log environment data
+app.post('/api/logs', (req, res) => {
     try {
-        const plant = await createPlant(req.body);
-        res.status(201).json(plant);
+        const log = addLog(req.body); // Add the log to the JSON file
+        res.status(201).json(log); // Respond with the newly added log
     } catch (error) {
-        console.error('Error creating plant:', error);
+        console.error('Error logging environment data:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-app.post('/api/logs', async (req, res) => {
+// Endpoint to retrieve all logs
+app.get('/api/logs', (req, res) => {
     try {
-        const log = await createLog(req.body);
-        console.log('Log created:', log);
-        res.status(201).json(log);
+        const logs = getAllLogs(); // Retrieve all logs
+        res.status(200).json(logs);
     } catch (error) {
-        console.error('Error creating log:', error);
+        console.error('Error fetching logs:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-app.post('/api/ai-logs', async (req, res) => {
+// Endpoint to retrieve logs by plant ID
+app.get('/api/logs/:plantId', (req, res) => {
     try {
-        const log = await createAILog(req.body);
-        res.status(201).json(log);
-    } catch (error) {
-        console.error('Error creating AI log:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/api/plants/:id', async (req, res) => {
-    try {
-        const plant = await getPlantById(req.params.id);
-        res.status(200).json(plant);
-    } catch (error) {
-        console.error('Error fetching plant:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/api/logs/:plantId', async (req, res) => {
-    try {
-        const logs = await getLogsByPlantId(req.params.plantId);
+        const logs = getLogsByPlantId(req.params.plantId); // Get logs for a specific plant
         res.status(200).json(logs);
     } catch (error) {
         console.error('Error fetching logs by plant ID:', error);
@@ -68,16 +45,8 @@ app.get('/api/logs/:plantId', async (req, res) => {
     }
 });
 
-app.get('/api/logs', async (req, res) => {
-    try {
-        const logs = await getAllLogs();
-        res.status(200).json(logs);
-    } catch (error) {
-        console.error('Error fetching all logs:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
+// Start the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+

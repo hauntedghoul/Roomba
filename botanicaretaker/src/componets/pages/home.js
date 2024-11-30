@@ -90,10 +90,11 @@ function Home() {
       minute: '2-digit',
       second: '2-digit',
     }).format(new Date());
-
+  
     const environmentLog = {
       timestamp: readableTimestamp,
-      soilMoisture: Math.random() * 0.2 + 0.1, 
+      plantId: isCactus ? 'cactus-gerald' : 'snake-plant-gerald',
+      soilMoisture: Math.random() * 0.2 + 0.1,
       temperature: 72,
       lightExposure: 0.5,
       plant: {
@@ -101,9 +102,19 @@ function Home() {
         stage: isCactus ? cactusState.currentStage.label : snakePlantState.currentStage.label,
       },
     };
-
-    console.log('Environment Log:', JSON.stringify(environmentLog, null, 2));
+  
+    fetch('http://localhost:4206/api/logs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(environmentLog),
+    })
+      .then((response) => response.json())
+      .then((data) => console.log('Environment log saved:', data))
+      .catch((error) => console.error('Error saving environment log:', error));
   }, [isCactus, cactusState, snakePlantState]);
+  
 
   useEffect(() => {
     logTimerRef.current = setInterval(() => {

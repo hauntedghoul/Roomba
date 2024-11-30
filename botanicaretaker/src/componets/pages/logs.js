@@ -33,27 +33,32 @@ function Logs() {
       <table>
         <thead>
           <tr>
-            <th>Stage</th>
-            <th>Height</th>
-            <th>Health</th>
             <th>Date</th>
+            <th>Plant </th>
+            <th>Soil Moisture</th>
+            <th>Temperature</th>
+            <th>Light Level</th>
+            <th>Height</th>
+            <th>Stage</th>
           </tr>
         </thead>
         <tbody className='tb'>
           {logs.map((log, index) => (
             <tr key={index}>
-              <td>{log.stage}</td>
-              <td>{log.height}</td>
-              <td>{log.health}</td>
-              <td>{new Date(log.time).toLocaleString()}</td>
-             
+              <td>{log.timestamp}</td>
+              <td>{log.plantId}</td>
+              <td>{log.soilMoisture}</td>
+              <td>{log.temperature}</td>
+              <td>{log.lightExposure}</td>
+              <td>{log.plant.height}cm</td>
+              <td>{log.plant.stage}</td>
             </tr>
           ))}
-          
+
         </tbody>
-        
+
       </table>
-      <hr className='line'/>
+      <hr className='line' />
       <button className='btn' onClick={clearLogs}>Clear Logs</button>
     </div>
   );

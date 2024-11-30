@@ -1,0 +1,48 @@
+{
+  "logs": [
+    {
+      "timestamp": "November 29, 2024 at 09:49:02 PM",
+      "plantId": "snake-plant-gerald",
+      "soilMoisture": 0.21932507906617912,
+      "temperature": 72,
+      "lightExposure": 0.5,
+      "plant": {
+        "height": 23,
+        "stage": "Stage 1"
+      }
+    },
+    {
+      "timestamp": "November 29, 2024 at 10:17:44 PM",
+      "plantId": "snake-plant-gerald",
+      "soilMoisture": 0.19237921634627786,
+      "temperature": 72,
+      "lightExposure": 0.5,
+      "plant": {
+        "height": 20,
+        "stage": "Stage 1"
+      }
+    },
+    {
+      "timestamp": "November 29, 2024 at 10:19:44 PM",
+      "plantId": "snake-plant-gerald",
+      "soilMoisture": 0.2726392669084728,
+      "temperature": 72,
+      "lightExposure": 0.5,
+      "plant": {
+        "height": 20,
+        "stage": "Stage 1"
+      }
+    },
+    {
+      "timestamp": "November 29, 2024 at 10:23:41 PM",
+      "plantId": "snake-plant-gerald",
+      "soilMoisture": 0.23572169301591198,
+      "temperature": 72,
+      "lightExposure": 0.5,
+      "plant": {
+        "height": 23,
+        "stage": "Stage 1"
+      }
+    }
+  ]
+}
