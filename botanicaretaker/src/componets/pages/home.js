@@ -24,29 +24,31 @@ const cactusGrowthStages = [
 
 function Home() {
   const [isWatered, setIsWatered] = useState(false);
+  const [currentStage, setCurrentStage] = useState(growthStages[0]);
   const [rewardPoints, setRewardPoints] = useState(0);
-  const [wateringInProgress, setWateringInProgress] = useState(false);
-  const [isCactus, setIsCactus] = useState(false);
-
-  // Initialize state from localStorage
-  const [cactusState, setCactusState] = useState(() => {
-    const savedState = localStorage.getItem('cactusState');
-    return savedState ? JSON.parse(savedState) : { height: 20, currentStage: cactusGrowthStages[0] };
-  });
-
-  const [snakePlantState, setSnakePlantState] = useState(() => {
-    const savedState = localStorage.getItem('snakePlantState');
-    return savedState ? JSON.parse(savedState) : { height: 20, currentStage: growthStages[0] };
-  });
+  const [wateringInProgress, setWateringInProgress] = useState(false); 
+  const [isCactus, setIsCactus] = useState(false); 
 
   const modelRef = useRef(null);
   const logTimerRef = useRef(null);
   const wateringTimerRef = useRef(null);
 
-  const WATERING_INTERVAL = 30000;
-  const LOGGING_INTERVAL = 2 * 60 * 1000;
+  const WATERING_INTERVAL = 30000; 
+  const LOGGING_INTERVAL = 2 * 60 * 1000; 
 
-  // Train Model
+  const initialCactusState = {
+    height: 20,
+    currentStage: cactusGrowthStages[0],
+  };
+
+  const initialSnakePlantState = {
+    height: 20,
+    currentStage: growthStages[0],
+  };
+
+  const [cactusState, setCactusState] = useState(initialCactusState);
+  const [snakePlantState, setSnakePlantState] = useState(initialSnakePlantState);
+
   const trainModel = useCallback(async () => {
     const soilMoisture = tf.randomUniform([200], 0.1, 0.5);
     const temperature = tf.fill([200], 72);
@@ -88,7 +90,7 @@ function Home() {
       minute: '2-digit',
       second: '2-digit',
     }).format(new Date());
-
+  
     const environmentLog = {
       timestamp: readableTimestamp,
       plantId: isCactus ? 'cactus-gerald' : 'snake-plant-gerald',
@@ -100,7 +102,7 @@ function Home() {
         stage: isCactus ? cactusState.currentStage.label : snakePlantState.currentStage.label,
       },
     };
-
+  
     fetch('http://localhost:4206/api/logs', {
       method: 'POST',
       headers: {
@@ -112,6 +114,7 @@ function Home() {
       .then((data) => console.log('Environment log saved:', data))
       .catch((error) => console.error('Error saving environment log:', error));
   }, [isCactus, cactusState, snakePlantState]);
+  
 
   useEffect(() => {
     logTimerRef.current = setInterval(() => {
@@ -142,10 +145,10 @@ function Home() {
         }
 
         if (nextStage !== prevState.currentStage) {
-          return { height: newHeight, currentStage: nextStage };
+          setCurrentStage(nextStage);
         }
 
-        return prevState;
+        return { height: newHeight, currentStage: nextStage };
       });
 
       setTimeout(() => {
@@ -178,19 +181,13 @@ function Home() {
   }, [waterPlant, wateringInProgress, isWatered]);
 
   const togglePlantType = () => {
+    if (isCactus) {
+      setSnakePlantState(initialSnakePlantState);
+    } else {
+      setCactusState(initialCactusState);
+    }
     setIsCactus((prev) => !prev);
   };
-
-  useEffect(() => {
-    // Save plant state to localStorage whenever any part of the plant state changes
-    const plantState = {
-      isCactus,
-      cactusState,
-      snakePlantState,
-      rewardPoints,
-    };
-    localStorage.setItem('plantState', JSON.stringify(plantState));
-  }, [isCactus, cactusState, snakePlantState, rewardPoints]);
 
   return (
     <div className="home">
