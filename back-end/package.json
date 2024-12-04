@@ -2,8 +2,8 @@
   "name": "back-end",
   "version": "1.0.0",
   "description": "",
-  "main": "database.js"
-  ,"scripts": {
+  "main": "database.js",
+  "scripts": {
     "start": "node database.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +12,7 @@
   "dependencies": {
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "mongoose": "^8.4.0"
   }
